@@ -1,5 +1,5 @@
 import React from "react";
-import { useState } from "react";
+import { useState, Fragment } from "react";
 import { useAtom } from 'jotai';
 import { usersAtom } from "@/store/atoms/usersAtom";
 import { usersUnderMeService } from "@/services/usersUnderMeService";
@@ -9,12 +9,24 @@ import {
   BellIcon,
   ArrowPathIcon,
   PencilSquareIcon,
+  PlusIcon,
+  TrashIcon,
 } from "@heroicons/react/24/outline";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { Dialog, Transition } from '@headlessui/react';
 
 export function Users() {
   const [users, setUsers] = useAtom(usersAtom);
   const [loading, setLoading] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+  const [newUser, setNewUser] = useState({
+    id: '',
+    name: '',
+  });
+  const [error, setError] = useState('');
+  const navigate = useNavigate();
+  const [addingUser, setAddingUser] = useState(false);
+  const [deletingUserId, setDeletingUserId] = useState(null);
 
   const refreshUsers = async () => {
     setLoading(true);
@@ -28,18 +40,66 @@ export function Users() {
     }
   };
 
+  const generateId = async () => {
+    try {
+      const id = await usersUnderMeService.generateUniqueId();
+      setNewUser(prev => ({ ...prev, id }));
+    } catch (error) {
+      setError('Error generating ID');
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+    setAddingUser(true);
+    try {
+      await usersUnderMeService.createUser(newUser);
+      setUsers((prevUsers) => [...prevUsers, newUser]);
+      setIsOpen(false);
+      navigate(`/dashboard/users/${newUser.id}`);
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setAddingUser(false);
+    }
+  };
+
+  const handleDelete = async (userId) => {
+    if (window.confirm('Are you sure you want to delete this user?')) {
+      setDeletingUserId(userId);
+      try {
+        await usersUnderMeService.deleteUser(userId);
+        setUsers((prevUsers) => prevUsers.filter(user => user.uid !== userId));
+      } catch (error) {
+        console.error('Error deleting user:', error);
+      } finally {
+        setDeletingUserId(null);
+      }
+    }
+  };
+
   return (
     <div className="mt-12">
       <div className="mb-12 grid gap-y-10 gap-x-6">
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-semibold">Users Management</h1>
-          <button
-            onClick={refreshUsers}
-            className="flex items-center gap-2 px-4 py-2 text-sm text-blue-600 hover:text-blue-700"
-          >
-            <ArrowPathIcon className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-            Refresh
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={refreshUsers}
+              className="flex items-center gap-2 px-4 py-2 text-sm text-blue-600 hover:text-blue-700"
+            >
+              <ArrowPathIcon className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+              Refresh
+            </button>
+            <button
+              onClick={() => setIsOpen(true)}
+              className="flex items-center gap-2 px-4 py-2 text-sm text-white bg-blue-600 hover:bg-blue-700 rounded-lg"
+            >
+              <PlusIcon className="h-4 w-4" />
+              Add User
+            </button>
+          </div>
         </div>
         
         {loading ? (
@@ -74,8 +134,10 @@ export function Users() {
                         <span className="text-sm text-gray-900">{user.phone || 'N/A'}</span>
                       </div>
                     </td>
-                    <td className="px-6 py-4">
-                      <span className="text-sm text-gray-900 line-clamp-2">{user.notes || 'N/A'}</span>
+                    <td className="px-6 py-4 max-w-xs">
+                      <span className="text-sm text-gray-900 truncate block overflow-hidden">
+                        {user.notes || 'N/A'}
+                      </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
@@ -85,17 +147,45 @@ export function Users() {
                         </span>
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {user.updatedAt ? new Date(user.updatedAt).toLocaleDateString() : 'N/A'}
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-500">
+                        <div className="group relative cursor-help">
+                          <span>{user.updatedAt ? new Date(user.updatedAt).toLocaleDateString() : 'N/A'}</span>
+                          {user.updatedAt && (
+                            <span className="invisible group-hover:visible absolute left-0 -bottom-6 bg-gray-800 text-white text-xs rounded py-1 px-2">
+                              {new Date(user.updatedAt).toLocaleTimeString()}
+                            </span>
+                          )}
+                        </div>
+                        {user.updatedBy && (
+                          <div className="text-xs text-gray-400">
+                            by {user.updatedBy}
+                          </div>
+                        )}
+                      </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <Link 
-                        to={`/dashboard/users/${user.uid}`}
-                        className="inline-flex items-center gap-2 px-3 py-2 text-sm text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-md transition-colors"
-                      >
-                        <PencilSquareIcon className="h-4 w-4" />
-                        Edit
-                      </Link>
+                      <div className="flex items-center gap-2">
+                        <Link 
+                          to={`/dashboard/users/${user.uid}`}
+                          className="inline-flex items-center gap-2 px-3 py-2 text-sm text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-md transition-colors"
+                        >
+                          <PencilSquareIcon className="h-4 w-4" />
+                          Edit
+                        </Link>
+                        <button
+                          onClick={() => handleDelete(user.uid)}
+                          className={`inline-flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:text-red-700 hover:bg-red-50 rounded-md transition-colors ${deletingUserId === user.uid ? 'opacity-50 cursor-not-allowed' : ''}`}
+                          disabled={deletingUserId === user.uid}
+                        >
+                          {deletingUserId === user.uid ? (
+                            <ArrowPathIcon className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <TrashIcon className="h-4 w-4" />
+                          )}
+                          {deletingUserId === user.uid ? 'Deleting...' : 'Delete'}
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -109,6 +199,108 @@ export function Users() {
             )}
           </div>
         )}
+
+        {/* Add User Modal */}
+        <Transition appear show={isOpen} as={Fragment}>
+          <Dialog as="div" className="relative z-10" onClose={() => setIsOpen(false)}>
+            <Transition.Child
+              as={Fragment}
+              enter="ease-out duration-300"
+              enterFrom="opacity-0"
+              enterTo="opacity-100"
+              leave="ease-in duration-200"
+              leaveFrom="opacity-100"
+              leaveTo="opacity-0"
+            >
+              <div className="fixed inset-0 bg-black bg-opacity-25" />
+            </Transition.Child>
+
+            <div className="fixed inset-0 overflow-y-auto">
+              <div className="flex min-h-full items-center justify-center p-4 text-center">
+                <Transition.Child
+                  as={Fragment}
+                  enter="ease-out duration-300"
+                  enterFrom="opacity-0 scale-95"
+                  enterTo="opacity-100 scale-100"
+                  leave="ease-in duration-200"
+                  leaveFrom="opacity-100 scale-100"
+                  leaveTo="opacity-0 scale-95"
+                >
+                  <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
+                    <Dialog.Title
+                      as="h3"
+                      className="text-lg font-medium leading-6 text-gray-900"
+                    >
+                      Add New User
+                    </Dialog.Title>
+
+                    <form onSubmit={handleSubmit} className="mt-4 space-y-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">
+                          User ID
+                        </label>
+                        <div className="mt-1 flex gap-2">
+                          <input
+                            type="text"
+                            value={newUser.id}
+                            onChange={(e) => setNewUser(prev => ({ ...prev, id: e.target.value.toUpperCase() }))}
+                            className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                            placeholder="Enter ID or generate"
+                            required
+                          />
+                          <button
+                            type="button"
+                            onClick={generateId}
+                            className="px-3 py-2 text-sm text-blue-600 hover:text-blue-700 border border-blue-600 rounded-lg"
+                          >
+                            Generate ID
+                          </button>
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">
+                          Name
+                        </label>
+                        <input
+                          type="text"
+                          value={newUser.name}
+                          onChange={(e) => setNewUser(prev => ({ ...prev, name: e.target.value }))}
+                          className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                          placeholder="Enter user name"
+                          required
+                        />
+                      </div>
+
+                      {error && (
+                        <div className="text-sm text-red-600">
+                          {error}
+                        </div>
+                      )}
+
+                      <div className="mt-6 flex justify-end gap-3">
+                        <button
+                          type="button"
+                          onClick={() => setIsOpen(false)}
+                          className="px-4 py-2 text-sm text-gray-600 hover:text-gray-700"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          type="submit"
+                          className={`px-4 py-2 text-sm text-white bg-blue-600 hover:bg-blue-700 rounded-lg ${addingUser ? 'opacity-50 cursor-not-allowed' : ''}`}
+                          disabled={addingUser}
+                        >
+                          {addingUser ? 'Adding...' : 'Continue to Edit'}
+                        </button>
+                      </div>
+                    </form>
+                  </Dialog.Panel>
+                </Transition.Child>
+              </div>
+            </div>
+          </Dialog>
+        </Transition>
       </div>
     </div>
   );

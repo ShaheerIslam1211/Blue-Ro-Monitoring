@@ -16,6 +16,7 @@ import { Navigate, useLocation } from "react-router-dom";
 import { onAuthStateChanged, getAuth } from "firebase/auth";
 import { useEffect, useState } from "react";
 import { EditUser } from "@/pages/dashboard/users/editUser";
+import { EditClient } from "@/pages/dashboard/clients/editClient";
 
 // Protected Route wrapper component
 const ProtectedRoute = ({ children }) => {
@@ -68,7 +69,7 @@ export const routes = [
       },
       {
         icon: <UserCircleIcon {...icon} />,
-        name: "profile",
+        name: "your profile",
         path: "/profile",
         element: <ProtectedRoute><Profile /></ProtectedRoute>,
         showInNav: true,
@@ -93,6 +94,13 @@ export const routes = [
         path: "/clients",
         element: <ProtectedRoute><Clients /></ProtectedRoute>,
         showInNav: true,
+      },
+      {
+        icon: <BuildingOfficeIcon {...icon} />,
+        name: "edit client",
+        path: "/clients/:clientId",
+        element: <ProtectedRoute><EditClient /></ProtectedRoute>,
+        showInNav: false,
       },
       {
         icon: <GlobeAmericasIcon {...icon} />,

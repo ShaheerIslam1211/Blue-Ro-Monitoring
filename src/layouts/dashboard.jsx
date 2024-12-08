@@ -17,6 +17,8 @@ import { userAtom } from "@/store/atoms/userAtom";
 import { usersAtom } from "@/store/atoms/usersAtom";
 import { userService } from "@/services/userService";
 import { usersUnderMeService } from "@/services/usersUnderMeService";
+import { clientsAtom } from "@/store/atoms/clientsAtom";
+import { clientsService } from "@/services/clientsService";
 
 export function Dashboard() {
   const [controller, dispatch] = useMaterialTailwindController();
@@ -24,6 +26,7 @@ export function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useAtom(userAtom);
   const [, setUsers] = useAtom(usersAtom);
+  const [, setClients] = useAtom(clientsAtom);
 
   useEffect(() => {
     const loadUserData = async (uid) => {
@@ -31,14 +34,18 @@ export function Dashboard() {
         const userData = await userService.getUserData(uid);
         if (userData) {
           setUser({...userData, uid});
-          // After loading user data, fetch users under them
-          const usersData = await usersUnderMeService.getAllUsers();
+          // After loading user data, fetch users and clients
+          const [usersData, clientsData] = await Promise.all([
+            usersUnderMeService.getAllUsers(),
+            clientsService.getAllClients()
+          ]);
           setUsers(usersData);
+          setClients(clientsData);
         } else {
           console.warn("No user data found in Firestore");
         }
       } catch (error) {
-        console.error("Error loading user data:", error);
+        console.error("Error loading data:", error);
       } finally {
         setLoading(false);
       }
@@ -51,11 +58,12 @@ export function Dashboard() {
         setLoading(false);
         setUser(null);
         setUsers([]); // Clear users when logged out
+        setClients([]); // Clear clients when logged out
       }
     });
 
     return () => unsubscribe();
-  }, [setUser, setUsers]);
+  }, [setUser, setUsers, setClients]);
 
   if (loading) {
     return (

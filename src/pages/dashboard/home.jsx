@@ -26,10 +26,15 @@ import {
   ordersOverviewData,
 } from "@/data";
 import { CheckCircleIcon, ClockIcon } from "@heroicons/react/24/solid";
+import { userAtom } from "@/store/atoms/userAtom";
+import { useAtom } from "jotai";
+import { WelcomeMessage } from "@/components/WelcomeMessage";
 
 export function Home() {
+  const [user] = useAtom(userAtom);
   return (
     <div className="mt-12">
+      <WelcomeMessage />
       <div className="mb-12 grid gap-y-10 gap-x-6 md:grid-cols-2 xl:grid-cols-4">
         {statisticsCardsData.map(({ icon, title, footer, ...rest }) => (
           <StatisticsCard

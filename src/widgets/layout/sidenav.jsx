@@ -8,8 +8,11 @@ import {
   Typography,
 } from "@material-tailwind/react";
 import { useMaterialTailwindController, setOpenSidenav } from "@/context";
+import { userAtom } from "@/store/atoms/userAtom";
+import { useAtom } from "jotai";
 
 export function Sidenav({ brandImg, brandName, routes }) {
+  const [user] = useAtom(userAtom);
   const [controller, dispatch] = useMaterialTailwindController();
   const { sidenavColor, sidenavType, openSidenav } = controller;
   const sidenavTypes = {
@@ -97,7 +100,7 @@ export function Sidenav({ brandImg, brandName, routes }) {
 
 Sidenav.defaultProps = {
   brandImg: "/img/logo-ct.png",
-  brandName: "Material Tailwind React",
+  brandName: "RO Plant Tracking",
 };
 
 Sidenav.propTypes = {

@@ -14,20 +14,26 @@ import {
 import routes from "@/routes";
 import { useMaterialTailwindController, setOpenConfigurator } from "@/context";
 import { userAtom } from "@/store/atoms/userAtom";
+import { usersAtom } from "@/store/atoms/usersAtom";
 import { userService } from "@/services/userService";
+import { usersUnderMeService } from "@/services/usersUnderMeService";
 
 export function Dashboard() {
   const [controller, dispatch] = useMaterialTailwindController();
   const { sidenavType } = controller;
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useAtom(userAtom);
+  const [, setUsers] = useAtom(usersAtom);
 
   useEffect(() => {
     const loadUserData = async (uid) => {
       try {
         const userData = await userService.getUserData(uid);
         if (userData) {
-          setUser({...userData, uid});// need to save uid to be able to update user data
+          setUser({...userData, uid});
+          // After loading user data, fetch users under them
+          const usersData = await usersUnderMeService.getAllUsers();
+          setUsers(usersData);
         } else {
           console.warn("No user data found in Firestore");
         }
@@ -44,11 +50,12 @@ export function Dashboard() {
       } else {
         setLoading(false);
         setUser(null);
+        setUsers([]); // Clear users when logged out
       }
     });
 
     return () => unsubscribe();
-  }, [setUser]);
+  }, [setUser, setUsers]);
 
   if (loading) {
     return (

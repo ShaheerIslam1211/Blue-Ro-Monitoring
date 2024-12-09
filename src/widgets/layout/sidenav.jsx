@@ -84,7 +84,7 @@ export function Sidenav({ brandImg, brandName, routes }) {
                         color="inherit"
                         className="font-medium capitalize"
                       >
-                        {name}
+                        {name==="{me}" ? user.name+" (Me)" : name}
                       </Typography>
                     </Button>
                   )}

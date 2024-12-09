@@ -11,12 +11,19 @@ import {
   ArrowPathIcon,
   ExclamationCircleIcon,
   ArrowLeftIcon,
+  ShieldCheckIcon,
+  BuildingOfficeIcon,
+  GlobeAmericasIcon,
 } from "@heroicons/react/24/outline";
 import { useAtom } from 'jotai';
 import { usersAtom } from "@/store/atoms/usersAtom";
+import { ClientsTab } from './ClientsTab';
+import { RegionsTab } from './RegionsTab';
+import { Tab } from '@headlessui/react';
 
 const tabs = [
   { id: 'personal', name: 'Personal Details', icon: UserCircleIcon },
+  { id: 'adminOptions', name: 'Admin Options', icon: ShieldCheckIcon },
   // More tabs can be added here later
   // { id: 'security', name: 'Security', icon: ShieldCheckIcon },
   // { id: 'preferences', name: 'Preferences', icon: Cog6ToothIcon },
@@ -114,7 +121,7 @@ export function EditUser() {
     try {
       await usersUnderMeService.updateUser(userId, formData);
       setUsers(users.map(user => 
-        user.uid === userId 
+        user.id === userId 
           ? { ...user, ...formData, updatedAt: new Date().toISOString() }
           : user
       ));
@@ -278,6 +285,68 @@ export function EditUser() {
               )}
             </button>
           </form>
+        )}
+        {activeTab === 'adminOptions' && (
+          <div className="space-y-6">
+            <Tab.Group>
+              <div className="border-b border-gray-200">
+                <Tab.List className="flex -mb-px space-x-8">
+                  <Tab className={({ selected }) =>
+                    `group inline-flex items-center px-1 py-4 border-b-2 font-medium text-sm outline-none
+                    ${selected
+                      ? 'border-blue-500 text-blue-600'
+                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    }`
+                  }>
+                    {({ selected }) => (
+                      <>
+                        <BuildingOfficeIcon 
+                          className={`mr-2 h-5 w-5 ${
+                            selected ? 'text-blue-500' : 'text-gray-400 group-hover:text-gray-500'
+                          }`}
+                        />
+                        <span>Client Access Management</span>
+                      </>
+                    )}
+                  </Tab>
+                  <Tab className={({ selected }) =>
+                    `group inline-flex items-center px-1 py-4 border-b-2 font-medium text-sm outline-none
+                    ${selected
+                      ? 'border-blue-500 text-blue-600'
+                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    }`
+                  }>
+                    {({ selected }) => (
+                      <>
+                        <GlobeAmericasIcon 
+                          className={`mr-2 h-5 w-5 ${
+                            selected ? 'text-blue-500' : 'text-gray-400 group-hover:text-gray-500'
+                          }`}
+                        />
+                        <span>Region Access Management</span>
+                      </>
+                    )}
+                  </Tab>
+                </Tab.List>
+              </div>
+              <Tab.Panels>
+                <Tab.Panel>
+                  <div className="bg-white rounded-lg">
+                    <div className="px-1 py-4">
+                      <ClientsTab userId={userId} />
+                    </div>
+                  </div>
+                </Tab.Panel>
+                <Tab.Panel>
+                  <div className="bg-white rounded-lg">
+                    <div className="px-1 py-4">
+                      <RegionsTab userId={userId} />
+                    </div>
+                  </div>
+                </Tab.Panel>
+              </Tab.Panels>
+            </Tab.Group>
+          </div>
         )}
       </div>
     </div>

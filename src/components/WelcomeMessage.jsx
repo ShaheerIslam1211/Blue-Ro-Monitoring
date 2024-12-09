@@ -1,6 +1,8 @@
 import { Typography } from "@material-tailwind/react";
 import { useAtom } from 'jotai';
 import { userAtom } from '@/store/atoms/userAtom';
+import { whoami } from '@/helper/whoami';
+import { InformationCircleIcon, ShieldCheckIcon } from "@heroicons/react/24/outline";
 
 export function WelcomeMessage() {
   const [user] = useAtom(userAtom);
@@ -15,21 +17,26 @@ export function WelcomeMessage() {
     } else if (hour >= 17 && hour < 21) {
       return { text: "Good Evening", emoji: "🌆" };
     } else {
-      return { text: "Shh Night time!", emoji: "🌙" };
+      return { text: "Night Time!", emoji: "🌙" };
     }
   };
 
   const { text, emoji } = getGreeting();
   const userName = user?.name || user?.email?.split('@')[0] || 'User';
+  const userRole = whoami();
 
   return (
-    <div className="mb-8">
-      <Typography variant="h3" className="font-semibold text-gray-800">
-        {text} {emoji}
-      </Typography>
-      <Typography variant="h4" className="font-normal text-gray-600">
-        Welcome back, {userName}!
-      </Typography>
+    <div className="space-y-6">
+      <div>
+        <Typography variant="h3" className="font-semibold text-gray-800">
+          {text} {emoji}
+        </Typography>
+        <Typography variant="h4" className="font-normal text-gray-600">
+          Welcome back, {userName}!
+        </Typography>
+      </div>
+
+     
     </div>
   );
 }

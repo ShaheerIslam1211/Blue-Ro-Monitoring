@@ -28,6 +28,8 @@ export function Clients() {
   });
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  const [addingClient, setAddingClient] = useState(false);
+  const [deletingClientId, setDeletingClientId] = useState(null);
 
   const refreshClients = async () => {
     setLoading(true);
@@ -53,23 +55,29 @@ export function Clients() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setAddingClient(true);
     try {
       await clientsService.createClient(newClient);
+      setClients((prevClients) => [...prevClients, newClient]);
       setIsOpen(false);
-      // Redirect to edit page after creation
       navigate(`/dashboard/clients/${newClient.id}`);
     } catch (error) {
       setError(error.message);
+    } finally {
+      setAddingClient(false);
     }
   };
 
   const handleDelete = async (clientId) => {
     if (window.confirm('Are you sure you want to delete this client?')) {
+      setDeletingClientId(clientId);
       try {
         await clientsService.deleteClient(clientId);
-        await refreshClients();
+        setClients((prevClients) => prevClients.filter(client => client.id !== clientId));
       } catch (error) {
         console.error('Error deleting client:', error);
+      } finally {
+        setDeletingClientId(null);
       }
     }
   };
@@ -167,10 +175,15 @@ export function Clients() {
                         </Link>
                         <button
                           onClick={() => handleDelete(client.id)}
-                          className="inline-flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:text-red-700 hover:bg-red-50 rounded-md transition-colors"
+                          className={`inline-flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:text-red-700 hover:bg-red-50 rounded-md transition-colors ${deletingClientId === client.id ? 'opacity-50 cursor-not-allowed' : ''}`}
+                          disabled={deletingClientId === client.id}
                         >
-                          <TrashIcon className="h-4 w-4" />
-                          Delete
+                          {deletingClientId === client.id ? (
+                            <ArrowPathIcon className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <TrashIcon className="h-4 w-4" />
+                          )}
+                          {deletingClientId === client.id ? 'Deleting...' : 'Delete'}
                         </button>
                       </div>
                     </td>
@@ -276,9 +289,10 @@ export function Clients() {
                       </button>
                       <button
                         type="submit"
-                        className="px-4 py-2 text-sm text-white bg-blue-600 hover:bg-blue-700 rounded-lg"
+                        className={`px-4 py-2 text-sm text-white bg-blue-600 hover:bg-blue-700 rounded-lg ${addingClient ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        disabled={addingClient}
                       >
-                        Continue to Edit
+                        {addingClient ? 'Adding...' : 'Continue to Edit'}
                       </button>
                     </div>
                   </form>

@@ -13,9 +13,9 @@ const createLogEntry = (action) => {
 
 export const userService = {
   // Get user data
-  async getUserData(uid) {
+  async getUserData(id) {
     try {
-      const userDoc = await getDoc(doc(db, "users", uid));
+      const userDoc = await getDoc(doc(db, "users", id));
       if (userDoc.exists()) {
         return userDoc.data();
       }
@@ -27,10 +27,10 @@ export const userService = {
   },
 
   // Create/Update user data
-  async setUserData(uid, userData) {
+  async setUserData(id, userData) {
     try {
       const logEntry = createLogEntry('Created/Updated user profile');
-      await setDoc(doc(db, "users", uid), {
+      await setDoc(doc(db, "users", id), {
         ...userData,
         ...logEntry,
         updatedAt: new Date().toISOString(),
@@ -42,10 +42,10 @@ export const userService = {
   },
 
   // Update specific user fields
-  async updateUserData(uid, updates) {
+  async updateUserData(id, updates) {
     try {
       const logEntry = createLogEntry('Updated user profile');
-      await updateDoc(doc(db, "users", uid), {
+      await updateDoc(doc(db, "users", id), {
         ...updates,
         ...logEntry,
         updatedAt: new Date().toISOString(),
@@ -57,12 +57,12 @@ export const userService = {
   },
 
   // Delete user data
-  async deleteUserData(uid) {
+  async deleteUserData(id) {
     try {
       // Log before deletion
       const logEntry = createLogEntry('Deleted user');
-      await updateDoc(doc(db, "users", uid), logEntry);
-      await deleteDoc(doc(db, "users", uid));
+      await updateDoc(doc(db, "users", id), logEntry);
+      await deleteDoc(doc(db, "users", id));
     } catch (error) {
       console.error("Error deleting user:", error);
       throw error;

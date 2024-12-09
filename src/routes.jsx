@@ -6,6 +6,8 @@ import {
   UsersIcon,
   BuildingOfficeIcon,
   GlobeAmericasIcon,
+  BuildingStorefrontIcon,
+  QuestionMarkCircleIcon,
 } from "@heroicons/react/24/solid";
 import { Home, Profile, Notifications } from "@/pages/dashboard";
 import { Users } from "@/pages/dashboard/users";
@@ -17,6 +19,10 @@ import { onAuthStateChanged, getAuth } from "firebase/auth";
 import { useEffect, useState } from "react";
 import { EditUser } from "@/pages/dashboard/users/editUser";
 import { EditClient } from "@/pages/dashboard/clients/editClient";
+import { EditRegion } from "@/pages/dashboard/regions/editRegion";
+import { Plants } from "@/pages/dashboard/plants";
+import { EditPlant } from "@/pages/dashboard/plants/editPlant";
+import { Instructions } from "@/components/Instructions";
 
 // Protected Route wrapper component
 const ProtectedRoute = ({ children }) => {
@@ -61,6 +67,13 @@ export const routes = [
     layout: "dashboard",
     pages: [
       {
+        icon: <InformationCircleIcon {...icon} />,
+        name: "notifications",
+        path: "/notifications",
+        element: <ProtectedRoute><Notifications /></ProtectedRoute>,
+        showInNav: true,
+      },
+      {
         icon: <HomeIcon {...icon} />,
         name: "dashboard",
         path: "/home",
@@ -69,7 +82,7 @@ export const routes = [
       },
       {
         icon: <UserCircleIcon {...icon} />,
-        name: "your profile",
+        name: "{me}",
         path: "/profile",
         element: <ProtectedRoute><Profile /></ProtectedRoute>,
         showInNav: true,
@@ -110,10 +123,31 @@ export const routes = [
         showInNav: true,
       },
       {
-        icon: <InformationCircleIcon {...icon} />,
-        name: "notifications",
-        path: "/notifications",
-        element: <ProtectedRoute><Notifications /></ProtectedRoute>,
+        icon: <GlobeAmericasIcon {...icon} />,
+        name: "edit region",
+        path: "/regions/:regionId",
+        element: <ProtectedRoute><EditRegion /></ProtectedRoute>,
+        showInNav: false,
+      },
+      {
+        icon: <BuildingStorefrontIcon {...icon} />,
+        name: "plants",
+        path: "/plants",
+        element: <ProtectedRoute><Plants /></ProtectedRoute>,
+        showInNav: true,
+      },
+      {
+        icon: <BuildingStorefrontIcon {...icon} />,
+        name: "edit plant",
+        path: "/plants/:plantId",
+        element: <ProtectedRoute><EditPlant /></ProtectedRoute>,
+        showInNav: false,
+      },
+      {
+        icon: <QuestionMarkCircleIcon {...icon} />,
+        name: "instructions",
+        path: "/instructions",
+        element: <ProtectedRoute><Instructions /></ProtectedRoute>,
         showInNav: true,
       },
     ],

@@ -18,12 +18,47 @@ export function Configurator() {
   const [controller, dispatch] = useMaterialTailwindController();
   const { openConfigurator, sidenavColor, sidenavType, fixedNavbar } = controller;
 
+  React.useEffect(() => {
+    const savedSettings = localStorage.getItem('dashboardSettings');
+    if (savedSettings) {
+      const settings = JSON.parse(savedSettings);
+      setSidenavColor(dispatch, settings.sidenavColor);
+      setSidenavType(dispatch, settings.sidenavType);
+      setFixedNavbar(dispatch, settings.fixedNavbar);
+    }
+  }, [dispatch]);
+
+  const saveSettings = (type, value) => {
+    const settings = {
+      sidenavColor,
+      sidenavType,
+      fixedNavbar,
+      [type]: value,
+    };
+    localStorage.setItem('dashboardSettings', JSON.stringify(settings));
+  };
+
   const sidenavColors = {
     white: "from-gray-100 to-gray-100 border-gray-200",
     dark: "from-black to-black border-gray-200",
     green: "from-green-400 to-green-600",
     blue: "from-blue-400 to-blue-600",
     red: "from-red-400 to-red-600",
+  };
+
+  const handleSidenavColor = (color) => {
+    setSidenavColor(dispatch, color);
+    saveSettings('sidenavColor', color);
+  };
+
+  const handleSidenavType = (type) => {
+    setSidenavType(dispatch, type);
+    saveSettings('sidenavType', type);
+  };
+
+  const handleFixedNavbar = (fixed) => {
+    setFixedNavbar(dispatch, fixed);
+    saveSettings('fixedNavbar', fixed);
   };
 
   return (
@@ -63,7 +98,7 @@ export function Configurator() {
                 } ${
                   sidenavColor === color ? "border-black" : "border-transparent"
                 }`}
-                onClick={() => setSidenavColor(dispatch, color)}
+                onClick={() => handleSidenavColor(color)}
               />
             ))}
           </div>
@@ -78,19 +113,19 @@ export function Configurator() {
           <div className="mt-3 flex items-center gap-2">
             <Button
               variant={sidenavType === "dark" ? "gradient" : "outlined"}
-              onClick={() => setSidenavType(dispatch, "dark")}
+              onClick={() => handleSidenavType("dark")}
             >
               Dark
             </Button>
             <Button
               variant={sidenavType === "transparent" ? "gradient" : "outlined"}
-              onClick={() => setSidenavType(dispatch, "transparent")}
+              onClick={() => handleSidenavType("transparent")}
             >
               Transparent
             </Button>
             <Button
               variant={sidenavType === "white" ? "gradient" : "outlined"}
-              onClick={() => setSidenavType(dispatch, "white")}
+              onClick={() => handleSidenavType("white")}
             >
               White
             </Button>
@@ -104,12 +139,13 @@ export function Configurator() {
             </Typography>
             <Switch
               id="navbar-fixed"
-              value={fixedNavbar}
-              onChange={() => setFixedNavbar(dispatch, !fixedNavbar)}
+              value={!fixedNavbar}
+              onChange={() => handleFixedNavbar(!fixedNavbar)}
             />
           </div>
           <hr />
         </div>
+      
         <div className="text-center">
           <Typography variant="h6" color="blue-gray">
             Need Help?

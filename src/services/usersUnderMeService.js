@@ -1,6 +1,11 @@
 import { collection, query, getDocs, doc, getDoc, updateDoc, setDoc, deleteDoc } from "firebase/firestore";
 import { db } from "@/firebase/firebase";
 import { getAuth } from "firebase/auth";
+import axios from 'axios';
+import { getDefaultStore } from "jotai";
+import { usersAtom } from "@/store/atoms/usersAtom";
+
+const API_URL = 'http://localhost:5000';
 
 // Helper function to create log entry
 const createLogEntry = (action) => {
@@ -30,11 +35,11 @@ export const usersUnderMeService = {
       const users = [];
       querySnapshot.forEach((doc) => {
         users.push({
-          uid: doc.id,
+          id: doc.id,
           ...doc.data()
         });
       });
-      return users;
+      return users.filter(user => user.id !== getAuth().currentUser?.uid);
     } catch (error) {
       console.error("Error fetching users:", error);
       throw error;
@@ -44,14 +49,7 @@ export const usersUnderMeService = {
   // Get single user
   async getUser(userId) {
     try {
-      const userDoc = await getDoc(doc(db, "users", userId));
-      if (userDoc.exists()) {
-        return {
-          uid: userDoc.id,
-          ...userDoc.data()
-        };
-      }
-      return null;
+      return getDefaultStore().get(usersAtom).find(user => user.id === userId);// no need to fetch from db, possible security issue,
     } catch (error) {
       console.error("Error fetching user:", error);
       throw error;
@@ -92,22 +90,25 @@ export const usersUnderMeService = {
   // Create new user
   async createUser(userData) {
     try {
-      if (!userData.id) {
-        throw new Error("User ID is required");
-      }
-
-      const exists = await this.checkIdExists(userData.id);
-      if (exists) {
-        throw new Error("User ID already exists");
-      }
-
+      // First create Firebase auth user
+      const response = await axios.post(`${API_URL}/create-user`, {
+        email: userData.email,
+        password: userData.password
+      });
+      
+      const uid = response.data.uid;
+      
+      // Then create Firestore user document
       const logEntry = createLogEntry('Created user');
-      await setDoc(doc(db, "users", userData.id), {
-        ...userData,
+      await setDoc(doc(db, "users", uid), {
+        email: userData.email,
+        name: userData.name,
         ...logEntry,
         createdAt: Date.now(),
         createdBy: getAuth().currentUser?.email || 'unknown',
       });
+      
+      return uid;
     } catch (error) {
       console.error("Error creating user:", error);
       throw error;
@@ -117,6 +118,12 @@ export const usersUnderMeService = {
   // Delete user
   async deleteUser(userId) {
     try {
+      // First delete from Firebase Auth
+      await axios.delete(`${API_URL}/delete-user`, {
+        data: { uid: userId }
+      });
+      
+      // Then delete from Firestore
       await deleteDoc(doc(db, "users", userId));
     } catch (error) {
       console.error("Error deleting user:", error);

@@ -83,7 +83,7 @@ export function Profile() {
     setMessage({ text: '', type: '' });
 
     try {
-      await userService.updateUserData(user.uid, formData);
+      await userService.updateUserData(user.id, formData);
       setUser({
         ...user,
         ...formData

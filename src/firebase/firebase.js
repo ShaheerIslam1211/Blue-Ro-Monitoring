@@ -20,3 +20,19 @@ const app = initializeApp(firebaseConfig);
 
 export const auth = getAuth(app);
 export const db = getFirestore(app);
+
+/**
+ * Calculate the active time since the token was issued.
+ * @returns {Promise<number>} Active time in minutes.
+ */
+export const getActiveTime = async () => {
+  const user = auth.currentUser;
+  if (user) {
+    const tokenResult = await user.getIdTokenResult();
+    const issuedAtTime = tokenResult.claims.iat * 1000; // Convert to milliseconds
+    const currentTime = Date.now();
+    const activeTimeInMinutes = Math.floor((currentTime - issuedAtTime) / 60000);
+    return activeTimeInMinutes;
+  }
+  return 0;
+};

@@ -19,6 +19,12 @@ import { userService } from "@/services/userService";
 import { usersUnderMeService } from "@/services/usersUnderMeService";
 import { clientsAtom } from "@/store/atoms/clientsAtom";
 import { clientsService } from "@/services/clientsService";
+import { regionsAtom } from "@/store/atoms/regionsAtom";
+import { regionsService } from "@/services/regionsService";
+import { plantsAtom } from "@/store/atoms/plantsAtom";
+import { plantsService } from "@/services/plantsService";
+import { RoleAlert } from "@/components/RoleAlert";
+import { whoami } from "@/helper/whoami";
 
 export function Dashboard() {
   const [controller, dispatch] = useMaterialTailwindController();
@@ -27,20 +33,26 @@ export function Dashboard() {
   const [user, setUser] = useAtom(userAtom);
   const [, setUsers] = useAtom(usersAtom);
   const [, setClients] = useAtom(clientsAtom);
+  const [, setRegions] = useAtom(regionsAtom);
+  const [, setPlants] = useAtom(plantsAtom);
 
   useEffect(() => {
-    const loadUserData = async (uid) => {
+    const loadUserData = async (id) => {
       try {
-        const userData = await userService.getUserData(uid);
+        const userData = await userService.getUserData(id);
         if (userData) {
-          setUser({...userData, uid});
-          // After loading user data, fetch users and clients
-          const [usersData, clientsData] = await Promise.all([
+          setUser({...userData, id});
+          // Fetch users, clients, and regions
+          const [usersData, clientsData, regionsData, plantsData] = await Promise.all([
             usersUnderMeService.getAllUsers(),
-            clientsService.getAllClients()
+            clientsService.getAllClients(),
+            regionsService.getAllRegions(),
+            plantsService.getAllPlants()
           ]);
           setUsers(usersData);
           setClients(clientsData);
+          setRegions(regionsData);
+          setPlants(plantsData);
         } else {
           console.warn("No user data found in Firestore");
         }
@@ -57,13 +69,15 @@ export function Dashboard() {
       } else {
         setLoading(false);
         setUser(null);
-        setUsers([]); // Clear users when logged out
-        setClients([]); // Clear clients when logged out
+        setUsers([]);
+        setClients([]);
+        setRegions([]);
+        setPlants([]);
       }
     });
 
     return () => unsubscribe();
-  }, [setUser, setUsers, setClients]);
+  }, [setUser, setUsers, setClients, setRegions, setPlants]);
 
   if (loading) {
     return (
@@ -73,8 +87,12 @@ export function Dashboard() {
     );
   }
 
+  const userRole = whoami();
+
   return (
-    <div className="min-h-screen bg-blue-gray-50/50">
+    <div>
+
+    <div className="min-h-screen bg-gray-50/50">
       <Sidenav
         routes={routes}
         brandImg={
@@ -82,6 +100,7 @@ export function Dashboard() {
         }
       />
       <div className="p-4 xl:ml-80">
+      {<RoleAlert />}
         <DashboardNavbar />
         <Configurator />
         <IconButton
@@ -107,6 +126,8 @@ export function Dashboard() {
         </div>
       </div>
     </div>
+    </div>
+
   );
 }
 

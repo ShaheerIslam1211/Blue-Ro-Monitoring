@@ -14,13 +14,15 @@ import {
 } from "@heroicons/react/24/outline";
 import { Link, useNavigate } from "react-router-dom";
 import { Dialog, Transition } from '@headlessui/react';
+import { EnvelopeIcon } from "@heroicons/react/24/solid";
 
 export function Users() {
   const [users, setUsers] = useAtom(usersAtom);
   const [loading, setLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [newUser, setNewUser] = useState({
-    id: '',
+    email: '',
+    password: '',
     name: '',
   });
   const [error, setError] = useState('');
@@ -54,10 +56,10 @@ export function Users() {
     setError('');
     setAddingUser(true);
     try {
-      await usersUnderMeService.createUser(newUser);
-      setUsers((prevUsers) => [...prevUsers, newUser]);
+      const uid= await usersUnderMeService.createUser(newUser);
+      setUsers((prevUsers) => [...prevUsers, { ...newUser, id: uid }]);
       setIsOpen(false);
-      navigate(`/dashboard/users/${newUser.id}`);
+      navigate(`/dashboard/users/${uid}`);
     } catch (error) {
       setError(error.message);
     } finally {
@@ -70,7 +72,7 @@ export function Users() {
       setDeletingUserId(userId);
       try {
         await usersUnderMeService.deleteUser(userId);
-        setUsers((prevUsers) => prevUsers.filter(user => user.uid !== userId));
+        setUsers((prevUsers) => prevUsers.filter(user => user.id !== userId));
       } catch (error) {
         console.error('Error deleting user:', error);
       } finally {
@@ -112,7 +114,7 @@ export function Users() {
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contact</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Notes</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Notifications</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Last Updated</th>
@@ -121,7 +123,7 @@ export function Users() {
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {users.map((user) => (
-                  <tr key={user.uid} className="hover:bg-gray-50">
+                  <tr key={user.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <UserCircleIcon className="h-5 w-5 text-gray-400 mr-2" />
@@ -132,6 +134,11 @@ export function Users() {
                       <div className="flex items-center">
                         <PhoneIcon className="h-5 w-5 text-gray-400 mr-2" />
                         <span className="text-sm text-gray-900">{user.phone || 'N/A'}</span>
+                       
+                      </div>
+                      <div className="flex items-center">
+                        <EnvelopeIcon className="h-5 w-5 text-gray-400 mr-2" />
+                        <span className="text-sm text-gray-900">{user.email || 'N/A'}</span>
                       </div>
                     </td>
                     <td className="px-6 py-4 max-w-xs">
@@ -167,23 +174,23 @@ export function Users() {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center gap-2">
                         <Link 
-                          to={`/dashboard/users/${user.uid}`}
+                          to={`/dashboard/users/${user.id}`}
                           className="inline-flex items-center gap-2 px-3 py-2 text-sm text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-md transition-colors"
                         >
                           <PencilSquareIcon className="h-4 w-4" />
                           Edit
                         </Link>
                         <button
-                          onClick={() => handleDelete(user.uid)}
-                          className={`inline-flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:text-red-700 hover:bg-red-50 rounded-md transition-colors ${deletingUserId === user.uid ? 'opacity-50 cursor-not-allowed' : ''}`}
-                          disabled={deletingUserId === user.uid}
+                          onClick={() => handleDelete(user.id)}
+                          className={`inline-flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:text-red-700 hover:bg-red-50 rounded-md transition-colors ${deletingUserId === user.id ? 'opacity-50 cursor-not-allowed' : ''}`}
+                          disabled={deletingUserId === user.id}
                         >
-                          {deletingUserId === user.uid ? (
+                          {deletingUserId === user.id ? (
                             <ArrowPathIcon className="h-4 w-4 animate-spin" />
                           ) : (
                             <TrashIcon className="h-4 w-4" />
                           )}
-                          {deletingUserId === user.uid ? 'Deleting...' : 'Delete'}
+                          {deletingUserId === user.id ? 'Deleting...' : 'Delete'}
                         </button>
                       </div>
                     </td>
@@ -237,25 +244,31 @@ export function Users() {
                     <form onSubmit={handleSubmit} className="mt-4 space-y-4">
                       <div>
                         <label className="block text-sm font-medium text-gray-700">
-                          User ID
+                          Email
                         </label>
-                        <div className="mt-1 flex gap-2">
-                          <input
-                            type="text"
-                            value={newUser.id}
-                            onChange={(e) => setNewUser(prev => ({ ...prev, id: e.target.value.toUpperCase() }))}
-                            className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm"
-                            placeholder="Enter ID or generate"
-                            required
-                          />
-                          <button
-                            type="button"
-                            onClick={generateId}
-                            className="px-3 py-2 text-sm text-blue-600 hover:text-blue-700 border border-blue-600 rounded-lg"
-                          >
-                            Generate ID
-                          </button>
-                        </div>
+                        <input
+                          type="email"
+                          value={newUser.email}
+                          onChange={(e) => setNewUser(prev => ({ ...prev, email: e.target.value }))}
+                          className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                          placeholder="Enter user email"
+                          required
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">
+                          Password
+                        </label>
+                        <input
+                          type="password"
+                          value={newUser.password}
+                          onChange={(e) => setNewUser(prev => ({ ...prev, password: e.target.value }))}
+                          className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                          placeholder="Enter password"
+                          required
+                          minLength="6"
+                        />
                       </div>
 
                       <div>
@@ -291,7 +304,7 @@ export function Users() {
                           className={`px-4 py-2 text-sm text-white bg-blue-600 hover:bg-blue-700 rounded-lg ${addingUser ? 'opacity-50 cursor-not-allowed' : ''}`}
                           disabled={addingUser}
                         >
-                          {addingUser ? 'Adding...' : 'Continue to Edit'}
+                          {addingUser ? 'Adding...' : 'Create User'}
                         </button>
                       </div>
                     </form>

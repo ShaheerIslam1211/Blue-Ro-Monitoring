@@ -47,21 +47,6 @@ export function EditRegion() {
     checkAccess();
   }, [regionId]);
 
-  if (loading) {
-    return <div className="flex justify-center items-center py-8">
-      <ArrowPathIcon className="h-8 w-8 animate-spin text-blue-500" />
-    </div>;
-  }
-
-  if (!hasAccess) {
-    return <NotFound 
-      title="Access Denied" 
-      message="You don't have permission to edit this region."
-      linkText="Back to Regions"
-      linkTo="/dashboard/regions"
-    />;
-  }
-
   useEffect(() => {
     fetchRegionData();
   }, [regionId]);
@@ -84,6 +69,21 @@ export function EditRegion() {
       setLoading(false);
     }
   };
+
+  if (loading) {
+    return <div className="flex justify-center items-center py-8">
+      <ArrowPathIcon className="h-8 w-8 animate-spin text-blue-500" />
+    </div>;
+  }
+
+  if (!hasAccess) {
+    return <NotFound 
+      title="Access Denied" 
+      message="You don't have permission to edit this region."
+      linkText="Back to Regions"
+      linkTo="/dashboard/regions"
+    />;
+  }
 
   const validateField = (name, value) => {
     switch (name) {

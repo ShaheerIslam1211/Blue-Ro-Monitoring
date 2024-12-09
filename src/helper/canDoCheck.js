@@ -3,7 +3,7 @@ import { userAtom } from '@/store/atoms/userAtom';
 import { whoami } from './whoami';
 
 // Base permission check functions
-const isSuperAdmin = () => whoami() === 'super_admin';
+export const isSuperAdmin = () => whoami() === 'super_admin';
 
 const checkPermission = (permissionKey) => {
   try {
@@ -17,7 +17,6 @@ const checkPermission = (permissionKey) => {
 
 // Permission check functions
 export const canAccessUsers = () => isSuperAdmin();
-
 export const canAddClients = () => checkPermission('clients_create');
 export const canDeleteClients = () => checkPermission('clients_delete');
 

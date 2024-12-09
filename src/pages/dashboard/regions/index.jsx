@@ -13,6 +13,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { Link, useNavigate } from "react-router-dom";
 import { Dialog, Transition } from '@headlessui/react';
+import { canAddRegions, canDeleteRegions } from '@/helper/canDoCheck';
 
 export function Regions() {
   const [regions, setRegions] = useAtom(regionsAtom);
@@ -91,13 +92,15 @@ export function Regions() {
               <ArrowPathIcon className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
               Refresh
             </button>
-            <button
-              onClick={() => setIsOpen(true)}
-              className="flex items-center gap-2 px-4 py-2 text-sm text-white bg-blue-600 hover:bg-blue-700 rounded-lg"
-            >
-              <PlusIcon className="h-4 w-4" />
-              Add Region
-            </button>
+            {canAddRegions() && (
+              <button
+                onClick={() => setIsOpen(true)}
+                className="flex items-center gap-2 px-4 py-2 text-sm text-white bg-blue-600 hover:bg-blue-700 rounded-lg"
+              >
+                <PlusIcon className="h-4 w-4" />
+                Add Region
+              </button>
+            )}
           </div>
         </div>
         
@@ -169,18 +172,20 @@ export function Regions() {
                           <PencilSquareIcon className="h-4 w-4" />
                           Edit
                         </Link>
-                        <button
-                          onClick={() => handleDelete(region.id)}
-                          className={`inline-flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:text-red-700 hover:bg-red-50 rounded-md transition-colors ${deletingRegionId === region.id ? 'opacity-50 cursor-not-allowed' : ''}`}
-                          disabled={deletingRegionId === region.id}
-                        >
-                          {deletingRegionId === region.id ? (
-                            <ArrowPathIcon className="h-4 w-4 animate-spin" />
-                          ) : (
-                            <TrashIcon className="h-4 w-4" />
-                          )}
-                          {deletingRegionId === region.id ? 'Deleting...' : 'Delete'}
-                        </button>
+                        {canDeleteRegions() && (
+                          <button
+                            onClick={() => handleDelete(region.id)}
+                            className={`inline-flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:text-red-700 hover:bg-red-50 rounded-md transition-colors ${deletingRegionId === region.id ? 'opacity-50 cursor-not-allowed' : ''}`}
+                            disabled={deletingRegionId === region.id}
+                          >
+                            {deletingRegionId === region.id ? (
+                              <ArrowPathIcon className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <TrashIcon className="h-4 w-4" />
+                            )}
+                            {deletingRegionId === region.id ? 'Deleting...' : 'Delete'}
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>

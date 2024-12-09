@@ -17,6 +17,7 @@ import {
 import { Link, useNavigate } from "react-router-dom";
 import { Dialog, Transition } from '@headlessui/react';
 import { Fragment } from 'react';
+import { canAddClients, canDeleteClients } from '@/helper/canDoCheck';
 
 export function Clients() {
   const [clients, setClients] = useAtom(clientsAtom);
@@ -95,13 +96,15 @@ export function Clients() {
               <ArrowPathIcon className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
               Refresh
             </button>
-            <button
-              onClick={() => setIsOpen(true)}
-              className="flex items-center gap-2 px-4 py-2 text-sm text-white bg-blue-600 hover:bg-blue-700 rounded-lg"
-            >
-              <PlusIcon className="h-4 w-4" />
-              Add Client
-            </button>
+            {canAddClients() && (
+              <button
+                onClick={() => setIsOpen(true)}
+                className="flex items-center gap-2 px-4 py-2 text-sm text-white bg-blue-600 hover:bg-blue-700 rounded-lg"
+              >
+                <PlusIcon className="h-4 w-4" />
+                Add Client
+              </button>
+            )}
           </div>
         </div>
         
@@ -168,23 +171,32 @@ export function Clients() {
                       <div className="flex items-center gap-2">
                         <Link 
                           to={`/dashboard/clients/${client.id}`}
-                          className="inline-flex items-center gap-2 px-3 py-2 text-sm text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-md transition-colors"
+                          className={`inline-flex items-center gap-2 px-3 py-2 text-sm 
+                            ${client.write 
+                              ? 'text-blue-600 hover:text-blue-700 hover:bg-blue-50' 
+                              : 'text-gray-400 cursor-not-allowed'
+                            } rounded-md transition-colors`}
+                          onClick={e => !client.write && e.preventDefault()}
+                          title={!client.write ? 'You do not have write permission' : ''}
                         >
                           <PencilSquareIcon className="h-4 w-4" />
                           Edit
                         </Link>
-                        <button
-                          onClick={() => handleDelete(client.id)}
-                          className={`inline-flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:text-red-700 hover:bg-red-50 rounded-md transition-colors ${deletingClientId === client.id ? 'opacity-50 cursor-not-allowed' : ''}`}
-                          disabled={deletingClientId === client.id}
-                        >
-                          {deletingClientId === client.id ? (
-                            <ArrowPathIcon className="h-4 w-4 animate-spin" />
-                          ) : (
-                            <TrashIcon className="h-4 w-4" />
-                          )}
-                          {deletingClientId === client.id ? 'Deleting...' : 'Delete'}
-                        </button>
+                        {canDeleteClients() && client.write && (
+                          <button
+                            onClick={() => handleDelete(client.id)}
+                            className={`inline-flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:text-red-700 hover:bg-red-50 rounded-md transition-colors 
+                              ${deletingClientId === client.id ? 'opacity-50 cursor-not-allowed' : ''}`}
+                            disabled={deletingClientId === client.id}
+                          >
+                            {deletingClientId === client.id ? (
+                              <ArrowPathIcon className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <TrashIcon className="h-4 w-4" />
+                            )}
+                            {deletingClientId === client.id ? 'Deleting...' : 'Delete'}
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>

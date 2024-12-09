@@ -23,6 +23,7 @@ import { EditRegion } from "@/pages/dashboard/regions/editRegion";
 import { Plants } from "@/pages/dashboard/plants";
 import { EditPlant } from "@/pages/dashboard/plants/editPlant";
 import { Instructions } from "@/components/Instructions";
+import { whoami } from "./helper/whoami";
 
 // Protected Route wrapper component
 const ProtectedRoute = ({ children }) => {
@@ -62,7 +63,7 @@ const icon = {
   className: "w-5 h-5 text-inherit",
 };
 
-export const routes = [
+let routes = [
   {
     layout: "dashboard",
     pages: [
@@ -168,4 +169,19 @@ export const routes = [
   },
 ];
 
-export default routes;
+export const getRoutes = () => {
+  const role = whoami();
+  
+  return routes.map(section => ({
+    ...section,
+    pages: section.pages.filter(page => {
+      // For non-super-admin users, filter out user management routes
+      if (role !== "super_admin") {
+        if (page.path === '/users' || page.path === '/users/:userId') {
+          return false;
+        }
+      }
+      return true;
+    })
+  })).filter(section => section.pages.length > 0); // Remove empty sections
+};

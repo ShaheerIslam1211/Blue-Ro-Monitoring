@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { regionsService } from "@/services/regionsService";
+import { NotFound } from "@/components/NotFound";
+import { accessCheck } from "@/helper/accessCheck";
 import {
   BuildingOfficeIcon,
   PencilSquareIcon,
@@ -20,8 +22,9 @@ const tabs = [
 
 export function EditRegion() {
   const { regionId } = useParams();
-  const [regions, setRegions] = useAtom(regionsAtom);
+  const [hasAccess, setHasAccess] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [regions, setRegions] = useAtom(regionsAtom);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState({ text: '', type: '' });
   const [errors, setErrors] = useState({});
@@ -33,6 +36,31 @@ export function EditRegion() {
   });
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('details');
+
+  useEffect(() => {
+    const checkAccess = () => {
+      const access = accessCheck(regionId, 'region');
+      setHasAccess(access.write);
+      setLoading(false);
+    };
+    
+    checkAccess();
+  }, [regionId]);
+
+  if (loading) {
+    return <div className="flex justify-center items-center py-8">
+      <ArrowPathIcon className="h-8 w-8 animate-spin text-blue-500" />
+    </div>;
+  }
+
+  if (!hasAccess) {
+    return <NotFound 
+      title="Access Denied" 
+      message="You don't have permission to edit this region."
+      linkText="Back to Regions"
+      linkTo="/dashboard/regions"
+    />;
+  }
 
   useEffect(() => {
     fetchRegionData();

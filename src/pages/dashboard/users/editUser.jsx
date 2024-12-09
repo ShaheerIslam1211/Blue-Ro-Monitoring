@@ -2,18 +2,15 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { usersUnderMeService } from "@/services/usersUnderMeService";
 import {
-  UserCircleIcon,
-  PhoneIcon,
-  PencilSquareIcon,
-  BellIcon,
-  CheckCircleIcon,
-  XCircleIcon,
-  ArrowPathIcon,
-  ExclamationCircleIcon,
-  ArrowLeftIcon,
-  ShieldCheckIcon,
-  BuildingOfficeIcon,
-  GlobeAmericasIcon,
+    UserCircleIcon,
+    PhoneIcon,
+    PencilSquareIcon,
+    BellIcon,
+    CheckCircleIcon,
+    XCircleIcon,
+    ArrowPathIcon, ArrowLeftIcon, BuildingOfficeIcon,
+    GlobeAmericasIcon,
+    KeyIcon, UserGroupIcon
 } from "@heroicons/react/24/outline";
 import { useAtom } from 'jotai';
 import { usersAtom } from "@/store/atoms/usersAtom";
@@ -21,13 +18,12 @@ import { ClientsTab } from './ClientsTab';
 import { RegionsTab } from './RegionsTab';
 import { Tab } from '@headlessui/react';
 import { InstructionsCard } from "@/components/InstructionsCard";
+import ReadWriteControl from "./ReadWriteControl";
 
 const tabs = [
   { id: 'personal', name: 'Personal Details', icon: UserCircleIcon },
-  { id: 'adminOptions', name: 'Admin Options', icon: ShieldCheckIcon },
-  // More tabs can be added here later
-  // { id: 'security', name: 'Security', icon: ShieldCheckIcon },
-  // { id: 'preferences', name: 'Preferences', icon: Cog6ToothIcon },
+  { id: 'adminOptions', name: 'Access Control', icon: UserGroupIcon },
+  { id: 'permissions', name: 'System Permissions', icon: KeyIcon },
 ];
 
 export function EditUser() {
@@ -150,6 +146,27 @@ export function EditUser() {
     },
     { 
       text: "Review permissions periodically to ensure they align with the user's current responsibilities." 
+    }
+  ];
+
+  const permissionInstructions = [
+    { 
+      text: "Read permissions allow users to view data within each module." 
+    },
+    { 
+      text: "Write permissions allow users to modify existing records." 
+    },
+    { 
+      text: "Create permissions allow users to add new records." 
+    },
+    { 
+      text: "Delete permissions allow users to remove existing records." 
+    },
+    { 
+      text: "⚠️ Important: Grant permissions based on the principle of least privilege - only give access that is necessary for the user's role." 
+    },
+    { 
+      text: "Changes to permissions take effect immediately after saving." 
     }
   ];
 
@@ -308,7 +325,6 @@ export function EditUser() {
         {activeTab === 'adminOptions' && (
           <div className="space-y-6">
             <InstructionsCard instructions={adminInstructions} />
-            
             <Tab.Group>
               <div className="border-b border-gray-200">
                 <Tab.List className="flex -mb-px space-x-8">
@@ -367,6 +383,12 @@ export function EditUser() {
                 </Tab.Panel>
               </Tab.Panels>
             </Tab.Group>
+          </div>
+        )}
+        {activeTab === 'permissions' && (
+          <div className="space-y-6">
+            <InstructionsCard instructions={permissionInstructions} />
+            <ReadWriteControl id={userId} />
           </div>
         )}
       </div>

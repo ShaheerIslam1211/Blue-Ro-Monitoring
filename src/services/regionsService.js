@@ -3,6 +3,8 @@ import { db } from "@/firebase/firebase";
 import { getAuth } from "firebase/auth";
 import { getDefaultStore } from "jotai";
 import { regionsAtom } from "@/store/atoms/regionsAtom";
+import { accessCheck } from "@/helper/accessCheck";
+import { userAtom } from "@/store/atoms/userAtom";
 
 // Helper function to create log entry
 const createLogEntry = (action) => {
@@ -80,15 +82,23 @@ export const regionsService = {
   // Get all regions
   async getAllRegions() {
     try {
+      const user = getDefaultStore().get(userAtom);
       const regionsRef = collection(db, "regions");
       const querySnapshot = await getDocs(regionsRef);
       const regions = [];
+      
       querySnapshot.forEach((doc) => {
-        regions.push({
-          id: doc.id,
-          ...doc.data()
-        });
+        const access = accessCheck(doc.id, 'region');
+        // Only include regions where user has at least read access
+        if (access.read||access.write) {
+          regions.push({
+            id: doc.id,
+            ...doc.data(),
+            write: access.write // Include write permission in region data
+          });
+        }
       });
+      
       return regions;
     } catch (error) {
       console.error("Error fetching regions:", error);

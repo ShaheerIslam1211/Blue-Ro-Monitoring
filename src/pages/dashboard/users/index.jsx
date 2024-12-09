@@ -15,8 +15,18 @@ import {
 import { Link, useNavigate } from "react-router-dom";
 import { Dialog, Transition } from '@headlessui/react';
 import { EnvelopeIcon } from "@heroicons/react/24/solid";
+import { canAccessUsers } from '@/helper/canDoCheck';
 
 export function Users() {
+  if (!canAccessUsers()) {
+    return (
+      <div className="mt-12 text-center">
+        <h1 className="text-2xl font-semibold text-gray-900">Access Denied</h1>
+        <p className="mt-2 text-gray-600">You don't have permission to manage users.</p>
+      </div>
+    );
+  }
+
   const [users, setUsers] = useAtom(usersAtom);
   const [loading, setLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);

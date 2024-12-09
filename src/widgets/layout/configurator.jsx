@@ -139,7 +139,8 @@ export function Configurator() {
             </Typography>
             <Switch
               id="navbar-fixed"
-              value={!fixedNavbar}
+              value={fixedNavbar}
+              checked={fixedNavbar}
               onChange={() => handleFixedNavbar(!fixedNavbar)}
             />
           </div>

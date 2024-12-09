@@ -11,7 +11,7 @@ import {
   Configurator,
   Footer,
 } from "@/widgets/layout";
-import routes from "@/routes";
+import { getRoutes } from "@/routes";
 import { useMaterialTailwindController, setOpenConfigurator } from "@/context";
 import { userAtom } from "@/store/atoms/userAtom";
 import { usersAtom } from "@/store/atoms/usersAtom";
@@ -94,7 +94,7 @@ export function Dashboard() {
 
     <div className="min-h-screen bg-gray-50/50">
       <Sidenav
-        routes={routes}
+        routes={getRoutes()}
         brandImg={
           sidenavType === "dark" ? "/img/logo-ct.png" : "/img/logo-ct-dark.png"
         }
@@ -113,7 +113,7 @@ export function Dashboard() {
           <Cog6ToothIcon className="h-5 w-5" />
         </IconButton>
         <Routes>
-          {routes.map(
+          {getRoutes().map(
             ({ layout, pages }) =>
               layout === "dashboard" &&
               pages.map(({ path, element }) => (

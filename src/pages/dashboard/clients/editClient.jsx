@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { clientsService } from "@/services/clientsService";
+import { NotFound } from "@/components/NotFound";
+import { accessCheck } from "@/helper/accessCheck";
 import {
   BuildingOfficeIcon,
   PhoneIcon,
@@ -33,6 +35,17 @@ export function EditClient() {
     email: '',
   });
   const navigate = useNavigate();
+  const [hasAccess, setHasAccess] = useState(false);
+
+  useEffect(() => {
+    const checkAccess = () => {
+      const access = accessCheck(clientId, 'client');
+      setHasAccess(access.write);
+      setLoading(false);
+    };
+    
+    checkAccess();
+  }, [clientId]);
 
   useEffect(() => {
     fetchClientData();
@@ -125,6 +138,21 @@ export function EditClient() {
       setSaving(false);
     }
   };
+
+  if (loading) {
+    return <div className="flex justify-center items-center py-8">
+      <ArrowPathIcon className="h-8 w-8 animate-spin text-blue-500" />
+    </div>;
+  }
+
+  if (!hasAccess) {
+    return <NotFound 
+      title="Access Denied" 
+      message="You don't have permission to edit this client."
+      linkText="Back to Clients"
+      linkTo="/dashboard/clients"
+    />;
+  }
 
   return (
     <div className="max-w-4xl mx-auto mt-12 px-4">

@@ -6,8 +6,9 @@ import {
   BuildingOfficeIcon,
   GlobeAmericasIcon
 } from "@heroicons/react/24/outline";
+import { whoami } from "@/helper/whoami";
 
-export function Instructions() {
+function SuperAdminInstructions() {
   const sections = [
     {
       icon: <ShieldCheckIcon className="h-6 w-6" />,
@@ -53,6 +54,14 @@ export function Instructions() {
       </div>
     </div>
   );
+}
+
+export function Instructions() {
+    const role= whoami()
+    if(role==="super_admin"){
+        return <SuperAdminInstructions/>
+    }
+   
 }
 
 export default Instructions; 

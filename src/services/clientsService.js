@@ -3,6 +3,8 @@ import { db } from "@/firebase/firebase";
 import { getAuth } from "firebase/auth";
 import { clientsAtom } from "@/store/atoms/clientsAtom";
 import { getDefaultStore } from "jotai";
+import { accessCheck } from "@/helper/accessCheck";
+import { userAtom } from "@/store/atoms/userAtom";
 
 // Helper function to create log entry
 const createLogEntry = (action) => {
@@ -79,15 +81,23 @@ export const clientsService = {
   // Get all clients
   async getAllClients() {
     try {
+      const user = getDefaultStore().get(userAtom);
       const clientsRef = collection(db, "clients");
       const querySnapshot = await getDocs(clientsRef);
       const clients = [];
+      
       querySnapshot.forEach((doc) => {
-        clients.push({
-          id: doc.id,
-          ...doc.data()
-        });
+        const access = accessCheck(doc.id, 'client');
+        // Only include clients where user has at least read access
+        if (access.read||access.write) {
+          clients.push({
+            id: doc.id,
+            ...doc.data(),
+            write: access.write // Include write permission in client data
+          });
+        }
       });
+      
       return clients;
     } catch (error) {
       console.error("Error fetching clients:", error);

@@ -18,6 +18,7 @@ import { BuildingStorefrontIcon } from "@heroicons/react/24/solid";
 import { clientsAtom } from "@/store/atoms/clientsAtom";
 import { regionsAtom } from "@/store/atoms/regionsAtom";
 import { BuildingOfficeIcon, GlobeAmericasIcon } from "@heroicons/react/24/outline";
+import { canAddPlants, canDeletePlants } from '@/helper/canDoCheck';
 
 export function Plants() {
   const [plants, setPlants] = useAtom(plantsAtom);
@@ -100,13 +101,15 @@ export function Plants() {
               <ArrowPathIcon className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
               Refresh
             </button>
-            <button
-              onClick={() => setIsOpen(true)}
-              className="flex items-center gap-2 px-4 py-2 text-sm text-white bg-blue-600 hover:bg-blue-700 rounded-lg"
-            >
-              <PlusIcon className="h-4 w-4" />
-              Add Plant
-            </button>
+            {canAddPlants() && (
+              <button
+                onClick={() => setIsOpen(true)}
+                className="flex items-center gap-2 px-4 py-2 text-sm text-white bg-blue-600 hover:bg-blue-700 rounded-lg"
+              >
+                <PlusIcon className="h-4 w-4" />
+                Add Plant
+              </button>
+            )}
           </div>
         </div>
         
@@ -178,18 +181,20 @@ export function Plants() {
                           <PencilSquareIcon className="h-4 w-4" />
                           Edit
                         </Link>
-                        <button
-                          onClick={() => handleDelete(plant.id)}
-                          className={`inline-flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:text-red-700 hover:bg-red-50 rounded-md transition-colors ${deletingPlantId === plant.id ? 'opacity-50 cursor-not-allowed' : ''}`}
-                          disabled={deletingPlantId === plant.id}
-                        >
-                          {deletingPlantId === plant.id ? (
-                            <ArrowPathIcon className="h-4 w-4 animate-spin" />
-                          ) : (
-                            <TrashIcon className="h-4 w-4" />
-                          )}
-                          {deletingPlantId === plant.id ? 'Deleting...' : 'Delete'}
-                        </button>
+                        {canDeletePlants() && (
+                          <button
+                            onClick={() => handleDelete(plant.id)}
+                            className={`inline-flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:text-red-700 hover:bg-red-50 rounded-md transition-colors ${deletingPlantId === plant.id ? 'opacity-50 cursor-not-allowed' : ''}`}
+                            disabled={deletingPlantId === plant.id}
+                          >
+                            {deletingPlantId === plant.id ? (
+                              <ArrowPathIcon className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <TrashIcon className="h-4 w-4" />
+                            )}
+                            {deletingPlantId === plant.id ? 'Deleting...' : 'Delete'}
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>

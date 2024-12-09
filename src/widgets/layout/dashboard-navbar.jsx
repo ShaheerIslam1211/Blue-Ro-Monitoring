@@ -29,6 +29,7 @@ import {
 
 import { signOut } from "firebase/auth";
 import { auth } from "@/firebase/firebase";
+import { DashboardSearch } from "./dashboard-search";
 
 export function DashboardNavbar() {
   const [controller, dispatch] = useMaterialTailwindController();
@@ -85,8 +86,8 @@ export function DashboardNavbar() {
           </Typography>
         </div>
         <div className="flex items-center">
-          <div className="mr-auto md:mr-4 md:w-56">
-            <Input label="Search" />
+          <div className="mr-auto md:mr-4">
+            <DashboardSearch />
           </div>
           <IconButton
             variant="text"

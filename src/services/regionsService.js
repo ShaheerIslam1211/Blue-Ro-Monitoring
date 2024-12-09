@@ -2,6 +2,7 @@ import { collection, query, getDocs, doc, getDoc, updateDoc, setDoc, deleteDoc }
 import { db } from "@/firebase/firebase";
 import { getAuth } from "firebase/auth";
 import { getDefaultStore } from "jotai";
+import { regionsAtom } from "@/store/atoms/regionsAtom";
 
 // Helper function to create log entry
 const createLogEntry = (action) => {

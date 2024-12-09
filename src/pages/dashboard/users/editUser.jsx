@@ -20,6 +20,7 @@ import { usersAtom } from "@/store/atoms/usersAtom";
 import { ClientsTab } from './ClientsTab';
 import { RegionsTab } from './RegionsTab';
 import { Tab } from '@headlessui/react';
+import { InstructionsCard } from "@/components/InstructionsCard";
 
 const tabs = [
   { id: 'personal', name: 'Personal Details', icon: UserCircleIcon },
@@ -133,6 +134,24 @@ export function EditUser() {
       setSaving(false);
     }
   };
+
+  const adminInstructions = [
+    { 
+      text: "Access permissions are hierarchical - Write access automatically includes Read access." 
+    },
+    { 
+      text: "Client Access: Granting access to a client allows the user to view/modify all plants associated with that client organization." 
+    },
+    { 
+      text: "Region Access: Granting access to a region allows the user to view/modify all plants within that geographical region." 
+    },
+    { 
+      text: "⚠️ Important: Users typically should have either Client OR Region access, not both. Having both types of access is uncommon and should be carefully considered." 
+    },
+    { 
+      text: "Review permissions periodically to ensure they align with the user's current responsibilities." 
+    }
+  ];
 
   if (loading) {
     return (
@@ -288,6 +307,8 @@ export function EditUser() {
         )}
         {activeTab === 'adminOptions' && (
           <div className="space-y-6">
+            <InstructionsCard instructions={adminInstructions} />
+            
             <Tab.Group>
               <div className="border-b border-gray-200">
                 <Tab.List className="flex -mb-px space-x-8">

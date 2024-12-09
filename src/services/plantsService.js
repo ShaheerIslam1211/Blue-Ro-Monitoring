@@ -1,6 +1,8 @@
 import { collection, query, getDocs, doc, getDoc, updateDoc, setDoc, deleteDoc } from "firebase/firestore";
 import { db } from "@/firebase/firebase";
 import { getAuth } from "firebase/auth";
+import { plantsAtom } from "@/store/atoms/plantsAtom";
+import { getDefaultStore } from "jotai";
 
 // Helper function to create log entry
 const createLogEntry = (action) => {
@@ -94,16 +96,20 @@ export const plantsService = {
   },
 
   // Get single plant
-  async getPlant(plantId) {
+  async getPlant(plantId, fetchFromDb = false) {// security issue, fetchFromDb should be false, to avoid non admin access
     try {
-      const plantDoc = await getDoc(doc(db, "plants", plantId));
-      if (plantDoc.exists()) {
+      if (fetchFromDb) {
+        const plantDoc = await getDoc(doc(db, "plants", plantId));
+        if (plantDoc.exists()) {
         return {
           id: plantDoc.id,
           ...plantDoc.data()
         };
       }
       return null;
+    }else{
+        return getDefaultStore().get(plantsAtom).find(plant => plant.id === plantId);
+    }
     } catch (error) {
       console.error("Error fetching plant:", error);
       throw error;

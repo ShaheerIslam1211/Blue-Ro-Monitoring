@@ -1,6 +1,7 @@
 import { collection, query, getDocs, doc, getDoc, updateDoc, setDoc, deleteDoc } from "firebase/firestore";
 import { db } from "@/firebase/firebase";
 import { getAuth } from "firebase/auth";
+import { getDefaultStore } from "jotai";
 
 // Helper function to create log entry
 const createLogEntry = (action) => {
@@ -95,16 +96,20 @@ export const regionsService = {
   },
 
   // Get single region
-  async getRegion(regionId) {
+  async getRegion(regionId, fetchFromDb = false) {// security issue, fetchFromDb should be false, to avoid non admin access
     try {
-      const regionDoc = await getDoc(doc(db, "regions", regionId));
-      if (regionDoc.exists()) {
+      if (fetchFromDb) {
+        const regionDoc = await getDoc(doc(db, "regions", regionId));
+        if (regionDoc.exists()) {
         return {
           id: regionDoc.id,
           ...regionDoc.data()
         };
       }
       return null;
+    }else{
+        return getDefaultStore().get(regionsAtom).find(region => region.id === regionId);
+    }
     } catch (error) {
       console.error("Error fetching region:", error);
       throw error;

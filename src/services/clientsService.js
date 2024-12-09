@@ -1,6 +1,8 @@
 import { collection, query, getDocs, doc, getDoc, updateDoc, setDoc, deleteDoc } from "firebase/firestore";
 import { db } from "@/firebase/firebase";
 import { getAuth } from "firebase/auth";
+import { clientsAtom } from "@/store/atoms/clientsAtom";
+import { getDefaultStore } from "jotai";
 
 // Helper function to create log entry
 const createLogEntry = (action) => {
@@ -94,21 +96,24 @@ export const clientsService = {
   },
 
   // Get single client
-  async getClient(clientId) {
-    try {
-      const clientDoc = await getDoc(doc(db, "clients", clientId));
-      if (clientDoc.exists()) {
+  async getClient(clientId, fetchFromDb = false) {// security issue, fetchFromDb should be false, to avoid non admin access
+      try {
+          if (fetchFromDb) {
+        const clientDoc = await getDoc(doc(db, "clients", clientId));
+        if (clientDoc.exists()) {
         return {
           id: clientDoc.id,
           ...clientDoc.data()
         };
       }
       return null;
+    }else{
+        return getDefaultStore().get(clientsAtom).find(client => client.id === clientId);
+    }
     } catch (error) {
       console.error("Error fetching client:", error);
       throw error;
-    }
-  },
+  }},
 
   // Update client
   async updateClient(clientId, updates) {

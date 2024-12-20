@@ -5,7 +5,7 @@ import axios from 'axios';
 import { getDefaultStore } from "jotai";
 import { usersAtom } from "@/store/atoms/usersAtom";
 
-const API_URL = 'http://localhost:5000';
+const API_URL = 'https://shaheer1211.pythonanywhere.com';
 
 // Helper function to create log entry
 const createLogEntry = (action) => {

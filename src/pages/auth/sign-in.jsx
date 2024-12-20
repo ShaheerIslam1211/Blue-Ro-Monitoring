@@ -62,7 +62,7 @@ export function SignIn() {
           />
         </div>
         <Typography variant="h3" className="text-blue-900 font-bold">
-          RO Plant Tracking
+          Blue Tech- RO Plant Monitoring
         </Typography>
         <Typography variant="paragraph" color="blue-gray" className="mt-1">
           Management Software

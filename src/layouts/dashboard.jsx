@@ -43,15 +43,15 @@ export function Dashboard() {
         if (userData) {
           setUser({...userData, id});
           // Fetch users, clients, and regions
-          const [usersData, clientsData, regionsData, plantsData] = await Promise.all([
+          const [usersData, clientsData, regionsData] = await Promise.all([
             usersUnderMeService.getAllUsers(),
             clientsService.getAllClients(),
             regionsService.getAllRegions(),
-            plantsService.getAllPlants()
           ]);
           setUsers(usersData);
           setClients(clientsData);
           setRegions(regionsData);
+          const plantsData= await plantsService.getAllPlants(clientsData, regionsData)
           setPlants(plantsData);
         } else {
           console.warn("No user data found in Firestore");

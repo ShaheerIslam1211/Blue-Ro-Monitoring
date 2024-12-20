@@ -3,6 +3,9 @@ import { db } from "@/firebase/firebase";
 import { getAuth } from "firebase/auth";
 import { plantsAtom } from "@/store/atoms/plantsAtom";
 import { getDefaultStore } from "jotai";
+import { regionsAtom } from "@/store/atoms/regionsAtom";
+import { clientsAtom } from "@/store/atoms/clientsAtom";
+import { isSuperAdmin } from "@/helper/canDoCheck";
 
 // Helper function to create log entry
 const createLogEntry = (action) => {
@@ -77,17 +80,21 @@ export const plantsService = {
   },
 
   // Get all plants
-  async getAllPlants() {
+  async getAllPlants(clients, regions) {
     try {
       const plantsRef = collection(db, "plants");
       const querySnapshot = await getDocs(plantsRef);
-      const plants = [];
+      let plants = [];
       querySnapshot.forEach((doc) => {
         plants.push({
           id: doc.id,
           ...doc.data()
         });
       });
+      if(isSuperAdmin()){
+        return plants
+      }
+      plants= plants.filter(plant => regions.find(region => region.id === plant.regionId)||clients.find(client => client.id === plant.clientId));
       return plants;
     } catch (error) {
       console.error("Error fetching plants:", error);

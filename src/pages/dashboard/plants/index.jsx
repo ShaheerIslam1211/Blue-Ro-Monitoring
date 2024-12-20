@@ -14,7 +14,7 @@ import {
 import { Link, useNavigate } from "react-router-dom";
 import { Dialog, Transition } from '@headlessui/react';
 import { Fragment } from 'react';
-import { BuildingStorefrontIcon } from "@heroicons/react/24/solid";
+import { BuildingStorefrontIcon, EyeIcon } from "@heroicons/react/24/solid";
 import { clientsAtom } from "@/store/atoms/clientsAtom";
 import { regionsAtom } from "@/store/atoms/regionsAtom";
 import { BuildingOfficeIcon, GlobeAmericasIcon } from "@heroicons/react/24/outline";
@@ -174,6 +174,13 @@ export function Plants() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center gap-2">
+                      <Link 
+                          to={`/dashboard/plant/${plant.id}`}
+                          className="inline-flex items-center gap-2 px-3 py-2 text-sm text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-md transition-colors"
+                        >
+                          <EyeIcon className="h-4 w-4" />
+                          Open
+                        </Link>
                         <Link 
                           to={`/dashboard/plants/${plant.id}`}
                           className="inline-flex items-center gap-2 px-3 py-2 text-sm text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-md transition-colors"

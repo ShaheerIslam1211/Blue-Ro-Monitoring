@@ -24,6 +24,7 @@ import { Plants } from "@/pages/dashboard/plants";
 import { EditPlant } from "@/pages/dashboard/plants/editPlant";
 import { Instructions } from "@/components/Instructions";
 import { whoami } from "./helper/whoami";
+import Plant from "./pages/dashboard/plant";
 
 // Protected Route wrapper component
 const ProtectedRoute = ({ children }) => {
@@ -151,6 +152,10 @@ let routes = [
         element: <ProtectedRoute><Instructions /></ProtectedRoute>,
         showInNav: true,
       },
+      {
+        path: "/plant/:plantId",
+        element: <Plant />
+      }
     ],
   },
   {

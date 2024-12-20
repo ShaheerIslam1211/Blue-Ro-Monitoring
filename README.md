@@ -1,6 +1,8 @@
 # RO Plant Tracking Software
 
-# URL= https://ro-plant-tracking.vercel.app/dashboard/home
+# URL= https://ro-plant-tracking.vercel.app/
+
+
 
 A modern dashboard application for tracking and managing RO (Reverse Osmosis) plant operations.
 

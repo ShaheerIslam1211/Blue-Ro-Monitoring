@@ -8,7 +8,7 @@ import { atom } from 'jotai';
 export const settingsAtom = atom({
   ph: { min: 6.0, max: 7.5 },
   tds: { min: 400, max: 500 },
-  flow: { min: 10, max: 15 }
+  flow: { min: 0, max: 1 }
 });
 
 export function Notifications() {
@@ -21,13 +21,13 @@ export function Notifications() {
       timestamp: new Date().toISOString(),
       ph: 5.8, 
       tds: 520,
-      flow: 16
+      flow: 0
     },
     plant2: { 
       timestamp: new Date().toISOString(),
       ph: 7.8, 
       tds: 380,
-      flow: 9
+      flow: 1
     },
   };
 
@@ -143,7 +143,7 @@ export function Notifications() {
             if (readings.flow < settings.flow.min) {
               alerts.push(`Flow rate too low: ${readings.flow} GPM`);
             } else if (readings.flow > settings.flow.max) {
-              alerts.push(`Flow rate too high: ${readings.flow} GPM`);
+              alerts.push(`Tank Level Level is Normal: ${readings.flow}`);
             }
 
             if (alerts.length === 0) return null;

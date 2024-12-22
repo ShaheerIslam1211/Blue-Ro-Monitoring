@@ -168,17 +168,6 @@ let routes = [
         ),
         showInNav: false,
       },
-      // {
-      //   icon: <BuildingStorefrontIcon {...icon} />,
-      //   name: 'plants',
-      //   path: '/plants',
-      //   element: (
-      //     <ProtectedRoute>
-      //       <Plants />
-      //     </ProtectedRoute>
-      //   ),
-      //   showInNav: true,
-      // },
 
       {
         icon: <BuildingStorefrontIcon {...icon} />,
@@ -189,7 +178,7 @@ let routes = [
             <Plants />
           </ProtectedRoute>
         ),
-        showInNav: true, // Hide this parent route since we'll use a dropdown
+        showInNav: true,
       },
       {
         icon: <BuildingStorefrontIcon {...icon} />,

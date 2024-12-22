@@ -1,10 +1,7 @@
-import React from "react";
-import PropTypes from "prop-types";
-import { Link } from "react-router-dom";
-import {
-  Navbar as MTNavbar,
-  Typography,
-} from "@material-tailwind/react";
+import React from 'react';
+import PropTypes from 'prop-types';
+import { Link } from 'react-router-dom';
+import { Navbar as MTNavbar, Typography } from '@material-tailwind/react';
 
 export function Navbar({ routes }) {
   const navList = (
@@ -20,7 +17,7 @@ export function Navbar({ routes }) {
           <Link to={path} className="flex items-center gap-1 p-1 font-normal">
             {icon &&
               React.createElement(icon, {
-                className: "w-[18px] h-[18px] opacity-50 mr-1",
+                className: 'w-[18px] h-[18px] opacity-50 mr-1',
               })}
             {name}
           </Link>
@@ -31,9 +28,7 @@ export function Navbar({ routes }) {
 
   return (
     <MTNavbar className="p-3">
-      <div className="container mx-auto">
-        {navList}
-      </div>
+      <div className="container mx-auto">{navList}</div>
     </MTNavbar>
   );
 }
@@ -42,6 +37,6 @@ Navbar.propTypes = {
   routes: PropTypes.arrayOf(PropTypes.object).isRequired,
 };
 
-Navbar.displayName = "/src/widgets/layout/navbar.jsx";
+Navbar.displayName = '/src/widgets/layout/navbar.jsx';
 
 export default Navbar;

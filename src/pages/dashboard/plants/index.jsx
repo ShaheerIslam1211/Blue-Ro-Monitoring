@@ -1,8 +1,8 @@
-import React from "react";
-import { useState } from "react";
+import React from 'react';
+import { useState } from 'react';
 import { useAtom } from 'jotai';
-import { plantsAtom } from "@/store/atoms/plantsAtom";
-import { plantsService } from "@/services/plantsService";
+import { plantsAtom } from '@/store/atoms/plantsAtom';
+import { plantsService } from '@/services/plantsService';
 import {
   PhoneIcon,
   EnvelopeIcon,
@@ -10,14 +10,17 @@ import {
   PencilSquareIcon,
   PlusIcon,
   TrashIcon,
-} from "@heroicons/react/24/outline";
-import { Link, useNavigate } from "react-router-dom";
+} from '@heroicons/react/24/outline';
+import { Link, useNavigate } from 'react-router-dom';
 import { Dialog, Transition } from '@headlessui/react';
 import { Fragment } from 'react';
-import { BuildingStorefrontIcon, EyeIcon } from "@heroicons/react/24/solid";
-import { clientsAtom } from "@/store/atoms/clientsAtom";
-import { regionsAtom } from "@/store/atoms/regionsAtom";
-import { BuildingOfficeIcon, GlobeAmericasIcon } from "@heroicons/react/24/outline";
+import { BuildingStorefrontIcon, EyeIcon } from '@heroicons/react/24/solid';
+import { clientsAtom } from '@/store/atoms/clientsAtom';
+import { regionsAtom } from '@/store/atoms/regionsAtom';
+import {
+  BuildingOfficeIcon,
+  GlobeAmericasIcon,
+} from '@heroicons/react/24/outline';
 import { canAddPlants, canDeletePlants } from '@/helper/canDoCheck';
 
 export function Plants() {
@@ -43,7 +46,7 @@ export function Plants() {
       const fetchedPlants = await plantsService.getAllPlants();
       setPlants(fetchedPlants);
     } catch (error) {
-      console.error("Error fetching plants:", error);
+      console.error('Error fetching plants:', error);
     } finally {
       setLoading(false);
     }
@@ -52,7 +55,7 @@ export function Plants() {
   const generateId = async () => {
     try {
       const id = await plantsService.generateUniqueId();
-      setNewPlant(prev => ({ ...prev, id }));
+      setNewPlant((prev) => ({ ...prev, id }));
     } catch (error) {
       setError('Error generating ID');
     }
@@ -79,7 +82,9 @@ export function Plants() {
       setDeletingPlantId(plantId);
       try {
         await plantsService.deletePlant(plantId);
-        setPlants((prevPlants) => prevPlants.filter(plant => plant.id !== plantId));
+        setPlants((prevPlants) =>
+          prevPlants.filter((plant) => plant.id !== plantId)
+        );
       } catch (error) {
         console.error('Error deleting plant:', error);
       } finally {
@@ -98,7 +103,9 @@ export function Plants() {
               onClick={refreshPlants}
               className="flex items-center gap-2 px-4 py-2 text-sm text-blue-600 hover:text-blue-700"
             >
-              <ArrowPathIcon className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+              <ArrowPathIcon
+                className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`}
+              />
               Refresh
             </button>
             {canAddPlants() && (
@@ -112,7 +119,7 @@ export function Plants() {
             )}
           </div>
         </div>
-        
+
         {loading ? (
           <div className="flex justify-center items-center py-8">
             <ArrowPathIcon className="h-8 w-8 animate-spin text-blue-500" />
@@ -122,43 +129,137 @@ export function Plants() {
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Plant Name</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contact Info</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Notes</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Last Updated</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    SR No.
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    PlantID
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Plant Name
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Plant Capacity
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Plant Status
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Running Hours
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Client Name
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Plant Region
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Contact Info
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Last Updated
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Actions
+                  </th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {plants.map((plant) => (
+                {plants.map((plant, index) => (
                   <tr key={plant.id} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className="text-sm font-medium text-gray-900">
+                        {index + 1}
+                      </span>
+                    </td>
+
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <BuildingStorefrontIcon className="h-5 w-5 text-gray-400 mr-2" />
-                        <span className="text-sm font-medium text-gray-900">{plant.name || 'N/A'}</span>
+                        <span className="text-sm font-medium text-gray-900">
+                          {plant.id || 'N/A'}
+                        </span>
                       </div>
                     </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center">
+                        <BuildingStorefrontIcon className="h-5 w-5 text-gray-400 mr-2" />
+                        <span className="text-sm font-medium text-gray-900">
+                          {plant.name || 'N/A'}
+                        </span>
+                      </div>
+                    </td>
+
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center">
+                        <BuildingStorefrontIcon className="h-5 w-5 text-gray-400 mr-2" />
+                        <span className="text-sm font-medium text-gray-900">
+                          {plant.capacity || 'N/A'}
+                        </span>
+                      </div>
+                    </td>
+
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center">
+                        <BuildingStorefrontIcon className="h-5 w-5 text-gray-400 mr-2" />
+                        <span className="text-sm font-medium text-gray-900">
+                          {plant.status || 'N/A'}
+                        </span>
+                      </div>
+                    </td>
+
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center">
+                        <BuildingStorefrontIcon className="h-5 w-5 text-gray-400 mr-2" />
+                        <span className="text-sm font-medium text-gray-900">
+                          {plant.runningHours || 'N/A'}
+                        </span>
+                      </div>
+                    </td>
+
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center">
+                        <BuildingStorefrontIcon className="h-5 w-5 text-gray-400 mr-2" />
+                        <span className="text-sm font-medium text-gray-900">
+                          {plant.clientId || 'N/A'}
+                        </span>
+                      </div>
+                    </td>
+
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center">
+                        <BuildingStorefrontIcon className="h-5 w-5 text-gray-400 mr-2" />
+                        <span className="text-sm font-medium text-gray-900">
+                          {plant.regionId || 'N/A'}
+                        </span>
+                      </div>
+                    </td>
+
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="space-y-1">
                         <div className="flex items-center">
                           <PhoneIcon className="h-4 w-4 text-gray-400 mr-2" />
-                          <span className="text-sm text-gray-600">{plant.phone || 'N/A'}</span>
+                          <span className="text-sm text-gray-600">
+                            {plant.phone || 'N/A'}
+                          </span>
                         </div>
                         <div className="flex items-center">
                           <EnvelopeIcon className="h-4 w-4 text-gray-400 mr-2" />
-                          <span className="text-sm text-gray-600">{plant.email || 'N/A'}</span>
+                          <span className="text-sm text-gray-600">
+                            {plant.email || 'N/A'}
+                          </span>
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 max-w-xs">
-                      <span className="text-sm text-gray-600 truncate block overflow-hidden">
-                        {plant.notes || 'N/A'}
-                      </span>
-                    </td>
+
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-500">
                         <div className="group relative cursor-help">
-                          <span>{plant.updatedAt ? new Date(plant.updatedAt).toLocaleDateString() : 'N/A'}</span>
+                          <span>
+                            {plant.updatedAt
+                              ? new Date(plant.updatedAt).toLocaleDateString()
+                              : 'N/A'}
+                          </span>
                           {plant.updatedAt && (
                             <span className="invisible group-hover:visible absolute left-0 -bottom-6 bg-gray-800 text-white text-xs rounded py-1 px-2">
                               {new Date(plant.updatedAt).toLocaleTimeString()}
@@ -174,14 +275,14 @@ export function Plants() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center gap-2">
-                      <Link 
+                        <Link
                           to={`/dashboard/plant/${plant.id}`}
                           className="inline-flex items-center gap-2 px-3 py-2 text-sm text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-md transition-colors"
                         >
                           <EyeIcon className="h-4 w-4" />
                           Open
                         </Link>
-                        <Link 
+                        <Link
                           to={`/dashboard/plants/${plant.id}`}
                           className="inline-flex items-center gap-2 px-3 py-2 text-sm text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-md transition-colors"
                         >
@@ -191,7 +292,11 @@ export function Plants() {
                         {canDeletePlants() && (
                           <button
                             onClick={() => handleDelete(plant.id)}
-                            className={`inline-flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:text-red-700 hover:bg-red-50 rounded-md transition-colors ${deletingPlantId === plant.id ? 'opacity-50 cursor-not-allowed' : ''}`}
+                            className={`inline-flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:text-red-700 hover:bg-red-50 rounded-md transition-colors ${
+                              deletingPlantId === plant.id
+                                ? 'opacity-50 cursor-not-allowed'
+                                : ''
+                            }`}
                             disabled={deletingPlantId === plant.id}
                           >
                             {deletingPlantId === plant.id ? (
@@ -199,7 +304,9 @@ export function Plants() {
                             ) : (
                               <TrashIcon className="h-4 w-4" />
                             )}
-                            {deletingPlantId === plant.id ? 'Deleting...' : 'Delete'}
+                            {deletingPlantId === plant.id
+                              ? 'Deleting...'
+                              : 'Delete'}
                           </button>
                         )}
                       </div>
@@ -208,7 +315,7 @@ export function Plants() {
                 ))}
               </tbody>
             </table>
-            
+
             {plants.length === 0 && (
               <div className="text-center py-8 text-gray-500">
                 No plants found
@@ -220,7 +327,11 @@ export function Plants() {
 
       {/* Add Plant Modal */}
       <Transition appear show={isOpen} as={Fragment}>
-        <Dialog as="div" className="relative z-10" onClose={() => setIsOpen(false)}>
+        <Dialog
+          as="div"
+          className="relative z-10"
+          onClose={() => setIsOpen(false)}
+        >
           <Transition.Child
             as={Fragment}
             enter="ease-out duration-300"
@@ -261,7 +372,12 @@ export function Plants() {
                         <input
                           type="text"
                           value={newPlant.id}
-                          onChange={(e) => setNewPlant(prev => ({ ...prev, id: e.target.value.toUpperCase() }))}
+                          onChange={(e) =>
+                            setNewPlant((prev) => ({
+                              ...prev,
+                              id: e.target.value.toUpperCase(),
+                            }))
+                          }
                           className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm"
                           placeholder="Enter ID or generate"
                           required
@@ -283,7 +399,12 @@ export function Plants() {
                       <input
                         type="text"
                         value={newPlant.name}
-                        onChange={(e) => setNewPlant(prev => ({ ...prev, name: e.target.value }))}
+                        onChange={(e) =>
+                          setNewPlant((prev) => ({
+                            ...prev,
+                            name: e.target.value,
+                          }))
+                        }
                         className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
                         placeholder="Enter plant name"
                         required
@@ -297,7 +418,12 @@ export function Plants() {
                         </label>
                         <select
                           value={newPlant.clientId}
-                          onChange={(e) => setNewPlant(prev => ({ ...prev, clientId: e.target.value }))}
+                          onChange={(e) =>
+                            setNewPlant((prev) => ({
+                              ...prev,
+                              clientId: e.target.value,
+                            }))
+                          }
                           className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
                         >
                           <option value="">Select Client (Optional)</option>
@@ -315,7 +441,12 @@ export function Plants() {
                         </label>
                         <select
                           value={newPlant.regionId}
-                          onChange={(e) => setNewPlant(prev => ({ ...prev, regionId: e.target.value }))}
+                          onChange={(e) =>
+                            setNewPlant((prev) => ({
+                              ...prev,
+                              regionId: e.target.value,
+                            }))
+                          }
                           className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
                         >
                           <option value="">Select Region (Optional)</option>
@@ -329,9 +460,7 @@ export function Plants() {
                     </div>
 
                     {error && (
-                      <div className="text-sm text-red-600">
-                        {error}
-                      </div>
+                      <div className="text-sm text-red-600">{error}</div>
                     )}
 
                     <div className="mt-6 flex justify-end gap-3">
@@ -344,7 +473,9 @@ export function Plants() {
                       </button>
                       <button
                         type="submit"
-                        className={`px-4 py-2 text-sm text-white bg-blue-600 hover:bg-blue-700 rounded-lg ${addingPlant ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        className={`px-4 py-2 text-sm text-white bg-blue-600 hover:bg-blue-700 rounded-lg ${
+                          addingPlant ? 'opacity-50 cursor-not-allowed' : ''
+                        }`}
                         disabled={addingPlant}
                       >
                         {addingPlant ? 'Adding...' : 'Continue to Edit'}

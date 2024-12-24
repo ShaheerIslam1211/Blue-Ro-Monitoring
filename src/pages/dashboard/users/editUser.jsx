@@ -1,24 +1,29 @@
-import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import { usersUnderMeService } from "@/services/usersUnderMeService";
+import { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { usersUnderMeService } from '@/services/usersUnderMeService';
 import {
-    UserCircleIcon,
-    PhoneIcon,
-    PencilSquareIcon,
-    BellIcon,
-    CheckCircleIcon,
-    XCircleIcon,
-    ArrowPathIcon, ArrowLeftIcon, BuildingOfficeIcon,
-    GlobeAmericasIcon,
-    KeyIcon, UserGroupIcon
-} from "@heroicons/react/24/outline";
+  UserCircleIcon,
+  PhoneIcon,
+  PencilSquareIcon,
+  BellIcon,
+  CheckCircleIcon,
+  XCircleIcon,
+  ArrowPathIcon,
+  ArrowLeftIcon,
+  BuildingOfficeIcon,
+  GlobeAmericasIcon,
+  KeyIcon,
+  UserGroupIcon,
+  EnvelopeIcon,
+} from '@heroicons/react/24/outline';
 import { useAtom } from 'jotai';
-import { usersAtom } from "@/store/atoms/usersAtom";
+import { usersAtom } from '@/store/atoms/usersAtom';
 import { ClientsTab } from './ClientsTab';
 import { RegionsTab } from './RegionsTab';
 import { Tab } from '@headlessui/react';
-import { InstructionsCard } from "@/components/InstructionsCard";
-import ReadWriteControl from "./ReadWriteControl";
+import { Country, State, City } from 'country-state-city';
+import { InstructionsCard } from '@/components/InstructionsCard';
+import ReadWriteControl from './ReadWriteControl';
 
 const tabs = [
   { id: 'personal', name: 'Personal Details', icon: UserCircleIcon },
@@ -29,22 +34,72 @@ const tabs = [
 export function EditUser() {
   const { userId } = useParams();
   const [users, setUsers] = useAtom(usersAtom);
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('personal');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState({ text: '', type: '' });
   const [errors, setErrors] = useState({});
+  const [countries, setCountries] = useState([]);
+  const [states, setStates] = useState([]);
+  const [cities, setCities] = useState([]);
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
+    email: '',
+    address: '',
+    zipcode: '',
+    country: '',
+    state: '',
+    city: '',
     notes: '',
-    receive_notification: false
+    receive_notification: false,
   });
-  const navigate = useNavigate();
 
   useEffect(() => {
     fetchUserData();
   }, [userId]);
+
+  useEffect(() => {
+    const loadCountries = async () => {
+      const countryList = Country.getAllCountries();
+      setCountries(countryList);
+    };
+    loadCountries();
+  }, []);
+
+  useEffect(() => {
+    if (formData.country) {
+      const selectedCountry = countries.find(
+        (country) => country.name === formData.country
+      );
+      if (selectedCountry) {
+        const statesList = State.getStatesOfCountry(selectedCountry.isoCode);
+        setStates(statesList);
+        setCities([]);
+      }
+    } else {
+      setStates([]);
+      setCities([]);
+    }
+  }, [formData.country, countries]);
+
+  useEffect(() => {
+    if (formData.state) {
+      const selectedState = states.find(
+        (state) => state.name === formData.state
+      );
+      if (selectedState) {
+        const citiesList = City.getCitiesOfState(
+          selectedState.countryCode,
+          selectedState.isoCode
+        );
+        setCities(citiesList);
+      }
+    } else {
+      setCities([]);
+    }
+  }, [formData.state, states]);
 
   const fetchUserData = async () => {
     try {
@@ -53,12 +108,18 @@ export function EditUser() {
         setFormData({
           name: userData.name || '',
           phone: userData.phone || '',
+          email: userData.email || '',
+          address: userData.address || '',
+          zipcode: userData.zipcode || '',
+          country: userData.country || '',
+          state: userData.state || '',
+          city: userData.city || '',
           notes: userData.notes || '',
-          receive_notification: userData.receive_notification || false
+          receive_notification: userData.receive_notification || false,
         });
       }
     } catch (error) {
-      console.error("Error fetching user:", error);
+      console.error('Error fetching user:', error);
       setMessage({ text: 'Error loading user data', type: 'error' });
     } finally {
       setLoading(false);
@@ -77,6 +138,9 @@ export function EditUser() {
           return 'Please enter a valid phone number';
         }
         return '';
+      case 'zipcode':
+        if (!/^\d{5,10}$/.test(value)) return 'Please enter a valid Zip Code';
+        return '';
       case 'notes':
         if (value.length > 500) return 'Notes must be less than 500 characters';
         return '';
@@ -88,19 +152,19 @@ export function EditUser() {
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     const newValue = type === 'checkbox' ? checked : value;
-    setFormData(prev => ({ ...prev, [name]: newValue }));
-    
+    setFormData((prev) => ({ ...prev, [name]: newValue }));
+
     if (type !== 'checkbox') {
       const error = validateField(name, value);
-      setErrors(prev => ({ ...prev, [name]: error }));
+      setErrors((prev) => ({ ...prev, [name]: error }));
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     const newErrors = {};
-    Object.keys(formData).forEach(key => {
+    Object.keys(formData).forEach((key) => {
       if (key !== 'receive_notification' && formData[key]) {
         const error = validateField(key, formData[key]);
         if (error) newErrors[key] = error;
@@ -117,57 +181,62 @@ export function EditUser() {
 
     try {
       await usersUnderMeService.updateUser(userId, formData);
-      setUsers(users.map(user => 
-        user.id === userId 
-          ? { ...user, ...formData, updatedAt: new Date().toISOString() }
-          : user
-      ));
+      setUsers(
+        users.map((user) =>
+          user.id === userId
+            ? { ...user, ...formData, updatedAt: new Date().toISOString() }
+            : user
+        )
+      );
       setMessage({ text: 'User updated successfully!', type: 'success' });
       setErrors({});
     } catch (error) {
-      setMessage({ text: 'Error updating user. Please try again.', type: 'error' });
+      setMessage({
+        text: 'Error updating user. Please try again.',
+        type: 'error',
+      });
     } finally {
       setSaving(false);
     }
   };
 
   const adminInstructions = [
-    { 
-      text: "Access permissions are hierarchical - Write access automatically includes Read access." 
+    {
+      text: 'Access permissions are hierarchical - Write access automatically includes Read access.',
     },
-    { 
-      text: "Client Access: Granting access to a client allows the user to view/modify all plants associated with that client organization." 
+    {
+      text: 'Client Access: Granting access to a client allows the user to view/modify all plants associated with that client organization.',
     },
-    { 
-      text: "Region Access: Granting access to a region allows the user to view/modify all plants within that geographical region." 
+    {
+      text: 'Region Access: Granting access to a region allows the user to view/modify all plants within that geographical region.',
     },
-    { 
-      text: "⚠️ Important: Users typically should have either Client OR Region access, not both. Having both types of access is uncommon and should be carefully considered." 
+    {
+      text: '⚠️ Important: Users typically should have either Client OR Region access, not both. Having both types of access is uncommon and should be carefully considered.',
     },
-    { 
-      text: "Review permissions periodically to ensure they align with the user's current responsibilities." 
-    }
+    {
+      text: "Review permissions periodically to ensure they align with the user's current responsibilities.",
+    },
   ];
 
   const permissionInstructions = [
-    { 
-      text: "Read permissions allow users to view data within each module." 
+    {
+      text: 'Read permissions allow users to view data within each module.',
     },
-    { 
-      text: "Write permissions allow users to modify existing records." 
+    {
+      text: 'Write permissions allow users to modify existing records.',
     },
-    { 
-      text: "Create permissions allow users to add new records." 
+    {
+      text: 'Create permissions allow users to add new records.',
     },
-    { 
-      text: "Delete permissions allow users to remove existing records." 
+    {
+      text: 'Delete permissions allow users to remove existing records.',
     },
-    { 
-      text: "⚠️ Important: Grant permissions based on the principle of least privilege - only give access that is necessary for the user's role." 
+    {
+      text: "⚠️ Important: Grant permissions based on the principle of least privilege - only give access that is necessary for the user's role.",
     },
-    { 
-      text: "Changes to permissions take effect immediately after saving." 
-    }
+    {
+      text: 'Changes to permissions take effect immediately after saving.',
+    },
   ];
 
   if (loading) {
@@ -198,9 +267,10 @@ export function EditUser() {
                 onClick={() => setActiveTab(tab.id)}
                 className={`
                   flex items-center gap-2 py-4 px-1 border-b-2 font-medium text-sm
-                  ${activeTab === tab.id
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  ${
+                    activeTab === tab.id
+                      ? 'border-blue-500 text-blue-600'
+                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                   }
                 `}
               >
@@ -227,7 +297,9 @@ export function EditUser() {
                 name="name"
                 value={formData.name}
                 onChange={handleChange}
-                className={`w-full px-4 py-3 rounded-lg border ${errors.name ? 'border-red-300' : 'border-gray-200'} focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
+                className={`w-full px-4 py-3 rounded-lg border ${
+                  errors.name ? 'border-red-300' : 'border-gray-200'
+                } focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
               />
               {errors.name && (
                 <p className="mt-1 text-sm text-red-500">{errors.name}</p>
@@ -244,10 +316,135 @@ export function EditUser() {
                 name="phone"
                 value={formData.phone}
                 onChange={handleChange}
-                className={`w-full px-4 py-3 rounded-lg border ${errors.phone ? 'border-red-300' : 'border-gray-200'} focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
+                className={`w-full px-4 py-3 rounded-lg border ${
+                  errors.phone ? 'border-red-300' : 'border-gray-200'
+                } focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
               />
               {errors.phone && (
                 <p className="mt-1 text-sm text-red-500">{errors.phone}</p>
+              )}
+            </div>
+
+            {/* Email (Read-Only) */}
+            <div>
+              <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
+                <EnvelopeIcon className="h-5 w-5 text-gray-400" />
+                Email (Read-Only)
+              </label>
+              <input
+                type="email"
+                name="email"
+                value={formData.email}
+                readOnly
+                className={`w-full px-4 py-3 rounded-lg border focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
+              />
+            </div>
+
+            {/* Address Input*/}
+            <div>
+              <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
+                <PencilSquareIcon className="h-5 w-5 text-gray-400" />
+                Address
+              </label>
+              <input
+                type="text"
+                name="address"
+                value={formData.address}
+                onChange={handleChange}
+                className={`w-full px-4 py-3 rounded-lg border focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
+              />
+            </div>
+
+            {/* Country Dropdown */}
+            <div>
+              <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
+                <GlobeAmericasIcon className="h-5 w-5 text-gray-400" />
+                Country
+              </label>
+              <select
+                name="country"
+                value={formData.country}
+                onChange={(e) => {
+                  handleChange(e);
+                  setFormData((prev) => ({ ...prev, state: '', city: '' }));
+                }}
+                className={`w-full px-4 py-3 rounded-lg border focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
+              >
+                <option value="">Select Country</option>
+                {countries.map((country) => (
+                  <option key={country.isoCode} value={country.name}>
+                    {country.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* State Dropdown */}
+            {formData.country && states.length > 0 && (
+              <div>
+                <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
+                  <GlobeAmericasIcon className="h-5 w-5 text-gray-400" />
+                  State
+                </label>
+                <select
+                  name="state"
+                  value={formData.state}
+                  onChange={(e) => {
+                    handleChange(e);
+                    setFormData((prev) => ({ ...prev, city: '' }));
+                  }}
+                  className={`w-full px-4 py-3 rounded-lg border focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
+                >
+                  <option value="">Select State</option>
+                  {states.map((state) => (
+                    <option key={state.isoCode} value={state.name}>
+                      {state.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            {/* City Dropdown */}
+            {formData.state && cities.length > 0 && (
+              <div>
+                <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
+                  <GlobeAmericasIcon className="h-5 w-5 text-gray-400" />
+                  City
+                </label>
+                <select
+                  name="city"
+                  value={formData.city}
+                  onChange={handleChange}
+                  className={`w-full px-4 py-3 rounded-lg border focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
+                >
+                  <option value="">Select City</option>
+                  {cities.map((city) => (
+                    <option key={city.name} value={city.name}>
+                      {city.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            {/* Zip Code Input*/}
+            <div>
+              <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
+                <PencilSquareIcon className="h-5 w-5 text-gray-400" />
+                Zip Code
+              </label>
+              <input
+                type="text"
+                name="zipcode"
+                value={formData.zipcode}
+                onChange={handleChange}
+                className={`w-full px-4 py-3 rounded-lg border  ${
+                  errors.zipcode ? 'border-red-300' : 'border-gray-200'
+                } focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
+              />
+              {errors.zipcode && (
+                <p className="mt-1 text-sm text-red-500">{errors.zipcode}</p>
               )}
             </div>
 
@@ -261,7 +458,9 @@ export function EditUser() {
                 value={formData.notes}
                 onChange={handleChange}
                 rows="4"
-                className={`w-full px-4 py-3 rounded-lg border ${errors.notes ? 'border-red-300' : 'border-gray-200'} focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
+                className={`w-full px-4 py-3 rounded-lg border ${
+                  errors.notes ? 'border-red-300' : 'border-gray-200'
+                } focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
               />
               {errors.notes && (
                 <p className="mt-1 text-sm text-red-500">{errors.notes}</p>
@@ -272,8 +471,12 @@ export function EditUser() {
               <div className="flex items-center gap-3">
                 <BellIcon className="h-6 w-6 text-gray-400" />
                 <div>
-                  <h3 className="text-sm font-medium text-gray-700">Notifications</h3>
-                  <p className="text-sm text-gray-500">Receive updates and alerts</p>
+                  <h3 className="text-sm font-medium text-gray-700">
+                    Notifications
+                  </h3>
+                  <p className="text-sm text-gray-500">
+                    Receive updates and alerts
+                  </p>
                 </div>
               </div>
               <label className="relative inline-flex items-center cursor-pointer">
@@ -289,9 +492,13 @@ export function EditUser() {
             </div>
 
             {message.text && (
-              <div className={`flex items-center gap-2 p-4 rounded-lg ${
-                message.type === 'success' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'
-              }`}>
+              <div
+                className={`flex items-center gap-2 p-4 rounded-lg ${
+                  message.type === 'success'
+                    ? 'bg-green-50 text-green-700'
+                    : 'bg-red-50 text-red-700'
+                }`}
+              >
                 {message.type === 'success' ? (
                   <CheckCircleIcon className="h-5 w-5" />
                 ) : (
@@ -328,36 +535,46 @@ export function EditUser() {
             <Tab.Group>
               <div className="border-b border-gray-200">
                 <Tab.List className="flex -mb-px space-x-8">
-                  <Tab className={({ selected }) =>
-                    `group inline-flex items-center px-1 py-4 border-b-2 font-medium text-sm outline-none
-                    ${selected
-                      ? 'border-blue-500 text-blue-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  <Tab
+                    className={({ selected }) =>
+                      `group inline-flex items-center px-1 py-4 border-b-2 font-medium text-sm outline-none
+                    ${
+                      selected
+                        ? 'border-blue-500 text-blue-600'
+                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                     }`
-                  }>
+                    }
+                  >
                     {({ selected }) => (
                       <>
-                        <BuildingOfficeIcon 
+                        <BuildingOfficeIcon
                           className={`mr-2 h-5 w-5 ${
-                            selected ? 'text-blue-500' : 'text-gray-400 group-hover:text-gray-500'
+                            selected
+                              ? 'text-blue-500'
+                              : 'text-gray-400 group-hover:text-gray-500'
                           }`}
                         />
                         <span>Client Access Management</span>
                       </>
                     )}
                   </Tab>
-                  <Tab className={({ selected }) =>
-                    `group inline-flex items-center px-1 py-4 border-b-2 font-medium text-sm outline-none
-                    ${selected
-                      ? 'border-blue-500 text-blue-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  <Tab
+                    className={({ selected }) =>
+                      `group inline-flex items-center px-1 py-4 border-b-2 font-medium text-sm outline-none
+                    ${
+                      selected
+                        ? 'border-blue-500 text-blue-600'
+                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                     }`
-                  }>
+                    }
+                  >
                     {({ selected }) => (
                       <>
-                        <GlobeAmericasIcon 
+                        <GlobeAmericasIcon
                           className={`mr-2 h-5 w-5 ${
-                            selected ? 'text-blue-500' : 'text-gray-400 group-hover:text-gray-500'
+                            selected
+                              ? 'text-blue-500'
+                              : 'text-gray-400 group-hover:text-gray-500'
                           }`}
                         />
                         <span>Region Access Management</span>
@@ -396,4 +613,4 @@ export function EditUser() {
   );
 }
 
-export default EditUser; 
+export default EditUser;

@@ -50,7 +50,7 @@ export function SignIn() {
       <div className="text-center mb-8">
         <div className="flex items-center justify-center mb-4">
           <img
-            src="../../../public/img/logo-bluetech.png"
+            src="/img/logo-bluetech.png"
             alt="RO Plant Logo"
             className="h-18 w-60"
             onError={(e) => (e.target.style.display = 'none')} // Fallback if logo doesn't exist

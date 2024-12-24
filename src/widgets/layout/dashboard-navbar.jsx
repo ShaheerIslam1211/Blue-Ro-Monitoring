@@ -1,4 +1,4 @@
-import { useLocation, Link, useNavigate } from "react-router-dom";
+import { useLocation, Link, useNavigate } from 'react-router-dom';
 import {
   Navbar,
   Typography,
@@ -11,7 +11,7 @@ import {
   MenuList,
   MenuItem,
   Avatar,
-} from "@material-tailwind/react";
+} from '@material-tailwind/react';
 import {
   UserCircleIcon,
   Cog6ToothIcon,
@@ -20,39 +20,39 @@ import {
   CreditCardIcon,
   Bars3Icon,
   ArrowRightOnRectangleIcon,
-} from "@heroicons/react/24/solid";
+} from '@heroicons/react/24/solid';
 import {
   useMaterialTailwindController,
   setOpenConfigurator,
   setOpenSidenav,
-} from "@/context";
+} from '@/context';
 
-import { signOut } from "firebase/auth";
-import { auth } from "@/firebase/firebase";
-import { DashboardSearch } from "./dashboard-search";
+import { signOut } from 'firebase/auth';
+import { auth } from '@/firebase/firebase';
+import { DashboardSearch } from './dashboard-search';
 
 export function DashboardNavbar() {
   const [controller, dispatch] = useMaterialTailwindController();
   const { fixedNavbar, openSidenav } = controller;
   const { pathname } = useLocation();
-  const [layout, page] = pathname.split("/").filter((el) => el !== "");
+  const [layout, page] = pathname.split('/').filter((el) => el !== '');
   const navigate = useNavigate();
 
   const handleLogout = async () => {
     try {
       await signOut(auth);
-      navigate("/auth/sign-in");
+      navigate('/auth/sign-in');
     } catch (error) {
-      console.error("Error signing out:", error);
+      console.error('Error signing out:', error);
     }
   };
   return (
     <Navbar
-      color={fixedNavbar ? "white" : "transparent"}
+      color={fixedNavbar ? 'white' : 'transparent'}
       className={`rounded-xl transition-all ${
         fixedNavbar
-          ? "sticky top-4 z-40 py-3 shadow-md shadow-blue-gray-500/5"
-          : "px-0 py-1"
+          ? 'sticky top-4 z-40 py-3 shadow-md shadow-blue-gray-500/5'
+          : 'px-0 py-1'
       }`}
       fullWidth
       blurred={fixedNavbar}
@@ -61,7 +61,7 @@ export function DashboardNavbar() {
         <div className="capitalize">
           <Breadcrumbs
             className={`bg-transparent p-0 transition-all ${
-              fixedNavbar ? "mt-1" : ""
+              fixedNavbar ? 'mt-1' : ''
             }`}
           >
             <Link to={`/${layout}`}>
@@ -98,22 +98,22 @@ export function DashboardNavbar() {
             <Bars3Icon strokeWidth={3} className="h-6 w-6 text-blue-gray-500" />
           </IconButton>
           <Link to="/auth/sign-in">
-          <Button
-    variant="text"
-    color="blue-gray"
-    className="hidden items-center gap-1 px-4 xl:flex normal-case"
-    onClick={handleLogout}
-  >
-    <ArrowRightOnRectangleIcon className="h-5 w-5 text-blue-gray-500" />
-  </Button>
-  <IconButton
-    variant="text"
-    color="blue-gray"
-    className="grid xl:hidden"
-    onClick={handleLogout}
-  >
-    <ArrowRightOnRectangleIcon className="h-5 w-5 text-blue-gray-500" />
-  </IconButton>
+            <Button
+              variant="text"
+              color="blue-gray"
+              className="hidden items-center gap-1 px-4 xl:flex normal-case"
+              onClick={handleLogout}
+            >
+              <ArrowRightOnRectangleIcon className="h-5 w-5 text-blue-gray-500" />
+            </Button>
+            <IconButton
+              variant="text"
+              color="blue-gray"
+              className="grid xl:hidden"
+              onClick={handleLogout}
+            >
+              <ArrowRightOnRectangleIcon className="h-5 w-5 text-blue-gray-500" />
+            </IconButton>
           </Link>
           <Menu>
             <MenuHandler>
@@ -122,7 +122,9 @@ export function DashboardNavbar() {
               </IconButton>
             </MenuHandler>
             <MenuList className="w-max border-0">
-              
+              <Typography>
+                Just checking the notification either they are appearing or not
+              </Typography>
             </MenuList>
           </Menu>
           <IconButton
@@ -138,6 +140,6 @@ export function DashboardNavbar() {
   );
 }
 
-DashboardNavbar.displayName = "/src/widgets/layout/dashboard-navbar.jsx";
+DashboardNavbar.displayName = '/src/widgets/layout/dashboard-navbar.jsx';
 
 export default DashboardNavbar;

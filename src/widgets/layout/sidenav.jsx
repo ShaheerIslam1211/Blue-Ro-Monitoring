@@ -29,6 +29,32 @@ export function Sidenav({ brandImg, brandName, routes }) {
     transparent: 'bg-transparent',
   };
 
+  const validColors = [
+    'white',
+    'blue-gray',
+    'gray',
+    'brown',
+    'deep-orange',
+    'orange',
+    'amber',
+    'yellow',
+    'lime',
+    'light-green',
+    'green',
+    'teal',
+    'cyan',
+    'light-blue',
+    'blue',
+    'indigo',
+    'deep-purple',
+    'purple',
+    'pink',
+    'red',
+  ];
+  const sanitizedColor = validColors.includes(sidenavColor)
+    ? sidenavColor
+    : 'blue-gray';
+
   return (
     <aside
       className={`${sidenavTypes[sidenavType]} ${
@@ -58,8 +84,11 @@ export function Sidenav({ brandImg, brandName, routes }) {
       <div className="m-4">
         {routes
           .filter((route) => route.showInNav !== false)
-          .map(({ layout, title, pages }, key) => (
-            <ul key={key} className="mb-4 flex flex-col gap-1">
+          .map(({ layout, title, pages }, routeIndex) => (
+            <ul
+              key={title || `route-${routeIndex}`}
+              className="mb-4 flex flex-col gap-1"
+            >
               {title && (
                 <li className="mx-3.5 mt-4 mb-2">
                   <Typography
@@ -75,18 +104,32 @@ export function Sidenav({ brandImg, brandName, routes }) {
                 .filter((page) => page.showInNav !== false)
                 .map(({ icon, name, path }) => {
                   if (name === 'plants') {
-                    // Plants dropdown in the navbar
                     return (
-                      <li key={name}>
+                      <li key="plants-dropdown">
                         <button
                           onClick={() =>
                             setPlantsDropdownOpen(!plantsDropdownOpen)
                           }
-                          className="flex items-center justify-between w-full px-4 py-2 text-sm text-white hover:bg-white/10 rounded-lg"
+                          className={`flex items-center justify-between w-full px-4 py-2 text-sm rounded-lg
+                          ${
+                            sidenavType === 'dark'
+                              ? 'text-white hover:bg-white/10'
+                              : sidenavType === 'white'
+                              ? 'text-blue-gray-500 hover:bg-blue-gray-500/10'
+                              : 'text-blue-gray-500 hover:bg-blue-gray-500/10'
+                          }`}
                         >
                           <div className="flex items-center gap-4">
                             {icon}
-                            <Typography color="inherit" className="font-medium">
+                            <Typography
+                              className={`font-medium ${
+                                sidenavType === 'dark'
+                                  ? 'text-white'
+                                  : sidenavType === 'white'
+                                  ? 'text-blue-gray-500'
+                                  : 'text-blue-gray-500'
+                              }`}
+                            >
                               Plants
                             </Typography>
                           </div>
@@ -98,22 +141,54 @@ export function Sidenav({ brandImg, brandName, routes }) {
                         </button>
                         {plantsDropdownOpen && (
                           <ul className="ml-6 mt-2 space-y-1">
-                            <li>
+                            <li key="data-sheet">
                               <NavLink
                                 to="/dashboard/plants/data-sheet"
-                                className="flex items-center gap-2 px-4 py-2 text-sm text-white hover:bg-white/10 rounded-lg"
+                                className={`align-middle select-none font-sans font-bold text-center transition-all disabled:opacity-50 disabled:shadow-none disabled:pointer-events-none text-xs py-3 rounded-lg w-full flex items-center gap-4 px-4 capitalize ${
+                                  sidenavType === 'dark'
+                                    ? 'text-white hover:bg-white/10'
+                                    : sidenavType === 'white'
+                                    ? 'text-blue-gray-500 hover:bg-blue-gray-500/10'
+                                    : 'text-blue-gray-500 hover:bg-blue-gray-500/10'
+                                }`}
                               >
                                 <BuildingStorefrontIcon className="h-5 w-5" />
-                                Data Sheet
+                                <span
+                                  className={`block antialiased font-sans text-base leading-relaxed font-medium capitalize ${
+                                    sidenavType === 'dark'
+                                      ? 'text-white'
+                                      : sidenavType === 'white'
+                                      ? 'text-blue-gray-500'
+                                      : 'text-blue-gray-500'
+                                  }`}
+                                >
+                                  Data Sheet
+                                </span>
                               </NavLink>
                             </li>
-                            <li>
+                            <li key="map-view">
                               <NavLink
                                 to="/dashboard/plants/map-view"
-                                className="flex items-center gap-2 px-4 py-2 text-sm text-white hover:bg-white/10 rounded-lg"
+                                className={`align-middle select-none font-sans font-bold text-center transition-all disabled:opacity-50 disabled:shadow-none disabled:pointer-events-none text-xs py-3 rounded-lg w-full flex items-center gap-4 px-4 capitalize ${
+                                  sidenavType === 'dark'
+                                    ? 'text-white hover:bg-white/10'
+                                    : sidenavType === 'white'
+                                    ? 'text-blue-gray-500 hover:bg-blue-gray-500/10'
+                                    : 'text-blue-gray-500 hover:bg-blue-gray-500/10'
+                                }`}
                               >
                                 <GlobeAmericasIcon className="h-5 w-5" />
-                                Map View
+                                <span
+                                  className={`block antialiased font-sans text-base leading-relaxed font-medium capitalize ${
+                                    sidenavType === 'dark'
+                                      ? 'text-white'
+                                      : sidenavType === 'white'
+                                      ? 'text-blue-gray-500'
+                                      : 'text-blue-gray-500'
+                                  }`}
+                                >
+                                  Map View
+                                </span>
                               </NavLink>
                             </li>
                           </ul>
@@ -122,14 +197,14 @@ export function Sidenav({ brandImg, brandName, routes }) {
                     );
                   }
                   return (
-                    <li key={name}>
+                    <li key={path || name}>
                       <NavLink to={`/${layout}${path}`}>
                         {({ isActive }) => (
                           <Button
                             variant={isActive ? 'gradient' : 'text'}
                             color={
                               isActive
-                                ? sidenavColor
+                                ? sanitizedColor
                                 : sidenavType === 'dark'
                                 ? 'white'
                                 : 'blue-gray'
@@ -158,7 +233,7 @@ export function Sidenav({ brandImg, brandName, routes }) {
 }
 
 Sidenav.defaultProps = {
-  brandImg: '/img/logo-ct.png',
+  brandImg: '../../../public/img/logo-bluetech.png',
   brandName: 'Blue Tech- RO Plant Monitoring',
 };
 

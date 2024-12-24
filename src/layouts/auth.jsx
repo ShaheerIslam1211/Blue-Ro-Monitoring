@@ -1,14 +1,13 @@
-import { Routes, Route } from "react-router-dom";
-import { getRoutes } from "@/routes";
+import { Routes, Route } from 'react-router-dom';
+import { getRoutes } from '@/routes';
 
 export function Auth() {
-
   return (
     <div className="relative min-h-screen w-full">
       <Routes>
         {getRoutes().map(
           ({ layout, pages }) =>
-            layout === "auth" &&
+            layout === 'auth' &&
             pages.map(({ path, element }) => (
               <Route exact path={path} element={element} />
             ))
@@ -18,6 +17,6 @@ export function Auth() {
   );
 }
 
-Auth.displayName = "/src/layout/Auth.jsx";
+Auth.displayName = '/src/layout/Auth.jsx';
 
 export default Auth;

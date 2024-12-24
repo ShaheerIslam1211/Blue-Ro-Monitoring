@@ -1,44 +1,39 @@
-import { useState } from "react";
-import {
-  Card,
-  Input,
-  Button,
-  Typography,
-} from "@material-tailwind/react";
-import { Link, useNavigate } from "react-router-dom";
-import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth } from "../../firebase/firebase";
-import { ArrowPathIcon } from "@heroicons/react/24/outline";
+import { useState } from 'react';
+import { Card, Input, Button, Typography } from '@material-tailwind/react';
+import { Link, useNavigate } from 'react-router-dom';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '../../firebase/firebase';
+import { ArrowPathIcon } from '@heroicons/react/24/outline';
 
 export function SignIn() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-    setError("");
-    
+    setError('');
+
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      navigate("/dashboard/home");
+      navigate('/dashboard/home');
     } catch (error) {
-      let errorMessage = "Failed to sign in";
+      let errorMessage = 'Failed to sign in';
       switch (error.code) {
         case 'auth/invalid-email':
-          errorMessage = "Invalid email address";
+          errorMessage = 'Invalid email address';
           break;
         case 'auth/user-disabled':
-          errorMessage = "This account has been disabled";
+          errorMessage = 'This account has been disabled';
           break;
         case 'auth/user-not-found':
-          errorMessage = "No account found with this email";
+          errorMessage = 'No account found with this email';
           break;
         case 'auth/wrong-password':
-          errorMessage = "Incorrect password";
+          errorMessage = 'Incorrect password';
           break;
         default:
           errorMessage = error.message;
@@ -54,17 +49,18 @@ export function SignIn() {
       {/* Logo and Title */}
       <div className="text-center mb-8">
         <div className="flex items-center justify-center mb-4">
-          <img 
-            src="/path-to-your-logo.png" 
-            alt="RO Plant Logo" 
-            className="h-16 w-16"
-            onError={(e) => e.target.style.display = 'none'} // Fallback if logo doesn't exist
+          <img
+            src="../../../public/img/logo-bluetech.png"
+            alt="RO Plant Logo"
+            className="h-18 w-60"
+            onError={(e) => (e.target.style.display = 'none')} // Fallback if logo doesn't exist
           />
         </div>
-        <Typography variant="h3" className="text-blue-900 font-bold">
-          Blue Tech- RO Plant Monitoring
+        <Typography variant="h4" color="blue-gray" className="mt-1">
+          RO Plant Monitoring
         </Typography>
-        <Typography variant="paragraph" color="blue-gray" className="mt-1">
+
+        <Typography variant="h6" color="blue-gray" className="mt-1">
           Management Software
         </Typography>
       </div>
@@ -74,15 +70,23 @@ export function SignIn() {
           <Typography variant="h4" className="font-bold text-blue-900">
             Welcome Back
           </Typography>
-          <Typography variant="paragraph" color="blue-gray" className="mt-2 font-normal">
+          <Typography
+            variant="paragraph"
+            color="blue-gray"
+            className="mt-2 font-normal"
+          >
             Enter your credentials to access your account
           </Typography>
         </div>
-        
+
         <form className="mt-8 mb-2 space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-4">
             <div>
-              <Typography variant="small" color="blue-gray" className="mb-2 font-medium">
+              <Typography
+                variant="small"
+                color="blue-gray"
+                className="mb-2 font-medium"
+              >
                 Email Address
               </Typography>
               <Input
@@ -93,14 +97,18 @@ export function SignIn() {
                 placeholder="name@company.com"
                 className="!border-t-blue-gray-200 focus:!border-blue-500"
                 labelProps={{
-                  className: "before:content-none after:content-none",
+                  className: 'before:content-none after:content-none',
                 }}
                 disabled={isLoading}
               />
             </div>
 
             <div>
-              <Typography variant="small" color="blue-gray" className="mb-2 font-medium">
+              <Typography
+                variant="small"
+                color="blue-gray"
+                className="mb-2 font-medium"
+              >
                 Password
               </Typography>
               <Input
@@ -111,7 +119,7 @@ export function SignIn() {
                 placeholder="Enter your password"
                 className="!border-t-blue-gray-200 focus:!border-blue-500"
                 labelProps={{
-                  className: "before:content-none after:content-none",
+                  className: 'before:content-none after:content-none',
                 }}
                 disabled={isLoading}
               />
@@ -119,7 +127,11 @@ export function SignIn() {
           </div>
 
           {error && (
-            <Typography variant="small" color="red" className="flex items-center justify-center mt-2">
+            <Typography
+              variant="small"
+              color="red"
+              className="flex items-center justify-center mt-2"
+            >
               <span className="bg-red-50 text-red-700 px-3 py-1 rounded-full">
                 {error}
               </span>
@@ -138,21 +150,30 @@ export function SignIn() {
                 Signing In...
               </div>
             ) : (
-              "Sign In"
+              'Sign In'
             )}
           </Button>
 
-          <Typography variant="small" className="text-center font-normal text-blue-gray-600">
-            Need help?{" "}
-            <Link to="/contact-support" className="font-medium text-blue-500 hover:text-blue-700 transition-colors">
+          <Typography
+            variant="small"
+            className="text-center font-normal text-blue-gray-600"
+          >
+            Need help?{' '}
+            <Link
+              to="/contact-support"
+              className="font-medium text-blue-500 hover:text-blue-700 transition-colors"
+            >
               Contact Support
             </Link>
           </Typography>
         </form>
       </Card>
 
-      <Typography variant="small" className="text-center mt-8 text-blue-gray-500">
-        © {new Date().getFullYear()} RO Plant Tracking. All rights reserved.
+      <Typography
+        variant="small"
+        className="text-center mt-8 text-blue-gray-500"
+      >
+        © {new Date().getFullYear()} BlueTech RO Plant. All rights reserved.
       </Typography>
     </section>
   );

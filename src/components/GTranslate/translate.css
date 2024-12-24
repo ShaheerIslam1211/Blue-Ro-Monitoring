@@ -1,0 +1,21 @@
+:root {
+  --margin-small: 10%;
+  --margin-medium: 30%;
+  --margin-large: 72%;
+}
+
+.gt_switcher {
+  margin-left: var(--margin-large);
+}
+
+@media (max-width: 600px) {
+  .gt_switcher {
+    margin-left: var(--margin-small);
+  }
+}
+
+@media (min-width: 601px) and (max-width: 1024px) {
+  .gt_switcher {
+    margin-left: var(--margin-medium);
+  }
+}

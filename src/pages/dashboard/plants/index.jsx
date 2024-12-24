@@ -97,7 +97,9 @@ export function Plants() {
     <div className="mt-12">
       <div className="mb-12 grid gap-y-10 gap-x-6">
         <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-semibold">Plants Management</h1>
+          <h1 className="text-2xl font-semibold">
+            Plants Data-Sheets & Management
+          </h1>
           <div className="flex gap-2">
             <button
               onClick={refreshPlants}

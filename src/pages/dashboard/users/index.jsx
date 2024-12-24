@@ -1,8 +1,8 @@
-import React from "react";
-import { useState, Fragment } from "react";
+import React from 'react';
+import { useState, Fragment } from 'react';
 import { useAtom } from 'jotai';
-import { usersAtom } from "@/store/atoms/usersAtom";
-import { usersUnderMeService } from "@/services/usersUnderMeService";
+import { usersAtom } from '@/store/atoms/usersAtom';
+import { usersUnderMeService } from '@/services/usersUnderMeService';
 import {
   UserCircleIcon,
   PhoneIcon,
@@ -11,10 +11,15 @@ import {
   PencilSquareIcon,
   PlusIcon,
   TrashIcon,
-} from "@heroicons/react/24/outline";
-import { Link, useNavigate } from "react-router-dom";
-import { Dialog, Transition } from '@headlessui/react';
-import { EnvelopeIcon } from "@heroicons/react/24/solid";
+} from '@heroicons/react/24/outline';
+import { Link, useNavigate } from 'react-router-dom';
+import {
+  Dialog,
+  DialogPanel,
+  Transition,
+  TransitionChild,
+} from '@headlessui/react';
+import { EnvelopeIcon } from '@heroicons/react/24/solid';
 import { canAccessUsers } from '@/helper/canDoCheck';
 
 export function Users() {
@@ -22,7 +27,9 @@ export function Users() {
     return (
       <div className="mt-12 text-center">
         <h1 className="text-2xl font-semibold text-gray-900">Access Denied</h1>
-        <p className="mt-2 text-gray-600">You don't have permission to manage users.</p>
+        <p className="mt-2 text-gray-600">
+          You don't have permission to manage users.
+        </p>
       </div>
     );
   }
@@ -46,7 +53,7 @@ export function Users() {
       const fetchedUsers = await usersUnderMeService.getAllUsers();
       setUsers(fetchedUsers);
     } catch (error) {
-      console.error("Error fetching users:", error);
+      console.error('Error fetching users:', error);
     } finally {
       setLoading(false);
     }
@@ -55,7 +62,7 @@ export function Users() {
   const generateId = async () => {
     try {
       const id = await usersUnderMeService.generateUniqueId();
-      setNewUser(prev => ({ ...prev, id }));
+      setNewUser((prev) => ({ ...prev, id }));
     } catch (error) {
       setError('Error generating ID');
     }
@@ -66,7 +73,7 @@ export function Users() {
     setError('');
     setAddingUser(true);
     try {
-      const uid= await usersUnderMeService.createUser(newUser);
+      const uid = await usersUnderMeService.createUser(newUser);
       setUsers((prevUsers) => [...prevUsers, { ...newUser, id: uid }]);
       setIsOpen(false);
       navigate(`/dashboard/users/${uid}`);
@@ -82,7 +89,7 @@ export function Users() {
       setDeletingUserId(userId);
       try {
         await usersUnderMeService.deleteUser(userId);
-        setUsers((prevUsers) => prevUsers.filter(user => user.id !== userId));
+        setUsers((prevUsers) => prevUsers.filter((user) => user.id !== userId));
       } catch (error) {
         console.error('Error deleting user:', error);
       } finally {
@@ -101,7 +108,9 @@ export function Users() {
               onClick={refreshUsers}
               className="flex items-center gap-2 px-4 py-2 text-sm text-blue-600 hover:text-blue-700"
             >
-              <ArrowPathIcon className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+              <ArrowPathIcon
+                className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`}
+              />
               Refresh
             </button>
             <button
@@ -113,7 +122,7 @@ export function Users() {
             </button>
           </div>
         </div>
-        
+
         {loading ? (
           <div className="flex justify-center items-center py-8">
             <ArrowPathIcon className="h-8 w-8 animate-spin text-blue-500" />
@@ -123,12 +132,30 @@ export function Users() {
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contact</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Notes</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Notifications</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Last Updated</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Name
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Contact Info
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Address
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Country
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Notes
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Notifications
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Last Updated
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Actions
+                  </th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
@@ -137,29 +164,51 @@ export function Users() {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <UserCircleIcon className="h-5 w-5 text-gray-400 mr-2" />
-                        <span className="text-sm text-gray-900">{user.name || 'N/A'}</span>
+                        <span className="text-sm text-gray-900">
+                          {user.name || 'N/A'}
+                        </span>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <PhoneIcon className="h-5 w-5 text-gray-400 mr-2" />
-                        <span className="text-sm text-gray-900">{user.phone || 'N/A'}</span>
-                       
+                        <span className="text-sm text-gray-900">
+                          {user.phone || 'N/A'}
+                        </span>
                       </div>
                       <div className="flex items-center">
                         <EnvelopeIcon className="h-5 w-5 text-gray-400 mr-2" />
-                        <span className="text-sm text-gray-900">{user.email || 'N/A'}</span>
+                        <span className="text-sm text-gray-900">
+                          {user.email || 'N/A'}
+                        </span>
                       </div>
+                    </td>
+                    <td className="px-6 py-4 max-w-xs">
+                      <span className="text-sm text-gray-900 truncate block overflow-hidden">
+                        {user.address || 'N/A'}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 max-w-xs">
+                      <span className="text-sm text-gray-900 truncate block overflow-hidden">
+                        {user.country || 'N/A'}
+                      </span>
                     </td>
                     <td className="px-6 py-4 max-w-xs">
                       <span className="text-sm text-gray-900 truncate block overflow-hidden">
                         {user.notes || 'N/A'}
                       </span>
                     </td>
+
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <BellIcon className="h-5 w-5 text-gray-400 mr-2" />
-                        <span className={`text-sm ${user.receive_notification ? 'text-green-600' : 'text-red-600'}`}>
+                        <span
+                          className={`text-sm ${
+                            user.receive_notification
+                              ? 'text-green-600'
+                              : 'text-red-600'
+                          }`}
+                        >
                           {user.receive_notification ? 'Enabled' : 'Disabled'}
                         </span>
                       </div>
@@ -167,7 +216,11 @@ export function Users() {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-500">
                         <div className="group relative cursor-help">
-                          <span>{user.updatedAt ? new Date(user.updatedAt).toLocaleDateString() : 'N/A'}</span>
+                          <span>
+                            {user.updatedAt
+                              ? new Date(user.updatedAt).toLocaleDateString()
+                              : 'N/A'}
+                          </span>
                           {user.updatedAt && (
                             <span className="invisible group-hover:visible absolute left-0 -bottom-6 bg-gray-800 text-white text-xs rounded py-1 px-2">
                               {new Date(user.updatedAt).toLocaleTimeString()}
@@ -183,7 +236,7 @@ export function Users() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center gap-2">
-                        <Link 
+                        <Link
                           to={`/dashboard/users/${user.id}`}
                           className="inline-flex items-center gap-2 px-3 py-2 text-sm text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-md transition-colors"
                         >
@@ -192,7 +245,11 @@ export function Users() {
                         </Link>
                         <button
                           onClick={() => handleDelete(user.id)}
-                          className={`inline-flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:text-red-700 hover:bg-red-50 rounded-md transition-colors ${deletingUserId === user.id ? 'opacity-50 cursor-not-allowed' : ''}`}
+                          className={`inline-flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:text-red-700 hover:bg-red-50 rounded-md transition-colors ${
+                            deletingUserId === user.id
+                              ? 'opacity-50 cursor-not-allowed'
+                              : ''
+                          }`}
                           disabled={deletingUserId === user.id}
                         >
                           {deletingUserId === user.id ? (
@@ -200,7 +257,9 @@ export function Users() {
                           ) : (
                             <TrashIcon className="h-4 w-4" />
                           )}
-                          {deletingUserId === user.id ? 'Deleting...' : 'Delete'}
+                          {deletingUserId === user.id
+                            ? 'Deleting...'
+                            : 'Delete'}
                         </button>
                       </div>
                     </td>
@@ -208,7 +267,7 @@ export function Users() {
                 ))}
               </tbody>
             </table>
-            
+
             {users.length === 0 && (
               <div className="text-center py-8 text-gray-500">
                 No users found
@@ -219,8 +278,12 @@ export function Users() {
 
         {/* Add User Modal */}
         <Transition appear show={isOpen} as={Fragment}>
-          <Dialog as="div" className="relative z-10" onClose={() => setIsOpen(false)}>
-            <Transition.Child
+          <Dialog
+            as="div"
+            className="relative z-10"
+            onClose={() => setIsOpen(false)}
+          >
+            <TransitionChild
               as={Fragment}
               enter="ease-out duration-300"
               enterFrom="opacity-0"
@@ -230,11 +293,11 @@ export function Users() {
               leaveTo="opacity-0"
             >
               <div className="fixed inset-0 bg-black bg-opacity-25" />
-            </Transition.Child>
+            </TransitionChild>
 
             <div className="fixed inset-0 overflow-y-auto">
               <div className="flex min-h-full items-center justify-center p-4 text-center">
-                <Transition.Child
+                <TransitionChild
                   as={Fragment}
                   enter="ease-out duration-300"
                   enterFrom="opacity-0 scale-95"
@@ -243,7 +306,7 @@ export function Users() {
                   leaveFrom="opacity-100 scale-100"
                   leaveTo="opacity-0 scale-95"
                 >
-                  <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
+                  <DialogPanel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
                     <Dialog.Title
                       as="h3"
                       className="text-lg font-medium leading-6 text-gray-900"
@@ -259,7 +322,12 @@ export function Users() {
                         <input
                           type="email"
                           value={newUser.email}
-                          onChange={(e) => setNewUser(prev => ({ ...prev, email: e.target.value }))}
+                          onChange={(e) =>
+                            setNewUser((prev) => ({
+                              ...prev,
+                              email: e.target.value,
+                            }))
+                          }
                           className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
                           placeholder="Enter user email"
                           required
@@ -273,7 +341,12 @@ export function Users() {
                         <input
                           type="password"
                           value={newUser.password}
-                          onChange={(e) => setNewUser(prev => ({ ...prev, password: e.target.value }))}
+                          onChange={(e) =>
+                            setNewUser((prev) => ({
+                              ...prev,
+                              password: e.target.value,
+                            }))
+                          }
                           className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
                           placeholder="Enter password"
                           required
@@ -288,7 +361,12 @@ export function Users() {
                         <input
                           type="text"
                           value={newUser.name}
-                          onChange={(e) => setNewUser(prev => ({ ...prev, name: e.target.value }))}
+                          onChange={(e) =>
+                            setNewUser((prev) => ({
+                              ...prev,
+                              name: e.target.value,
+                            }))
+                          }
                           className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
                           placeholder="Enter user name"
                           required
@@ -296,9 +374,7 @@ export function Users() {
                       </div>
 
                       {error && (
-                        <div className="text-sm text-red-600">
-                          {error}
-                        </div>
+                        <div className="text-sm text-red-600">{error}</div>
                       )}
 
                       <div className="mt-6 flex justify-end gap-3">
@@ -311,15 +387,17 @@ export function Users() {
                         </button>
                         <button
                           type="submit"
-                          className={`px-4 py-2 text-sm text-white bg-blue-600 hover:bg-blue-700 rounded-lg ${addingUser ? 'opacity-50 cursor-not-allowed' : ''}`}
+                          className={`px-4 py-2 text-sm text-white bg-blue-600 hover:bg-blue-700 rounded-lg ${
+                            addingUser ? 'opacity-50 cursor-not-allowed' : ''
+                          }`}
                           disabled={addingUser}
                         >
                           {addingUser ? 'Adding...' : 'Create User'}
                         </button>
                       </div>
                     </form>
-                  </Dialog.Panel>
-                </Transition.Child>
+                  </DialogPanel>
+                </TransitionChild>
               </div>
             </div>
           </Dialog>
@@ -329,4 +407,4 @@ export function Users() {
   );
 }
 
-export default Users; 
+export default Users;
